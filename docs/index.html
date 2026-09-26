@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    (function() {
+      const storedTheme = localStorage.getItem('theme') || localStorage.getItem('bh-theme');
+      if (storedTheme) {
+        document.documentElement.setAttribute('data-theme', storedTheme);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-NFEM8TN9ZM"></script>
   <script>
@@ -25,37 +37,725 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
+  <style>
+
+    /* =============================================================
+       SWISS ARCHITECTURAL DESIGN SYSTEM & SITE HEADER (BRANDON HUBBARD)
+       ============================================================= */
+    :root {
+      --color-void: #0a0a0a;
+      --color-charcoal: #121212;
+      --color-concrete: #262626;
+      --color-concrete-light: #3a3a3a;
+      --color-titanium: #ffffff;
+      --color-steel: #888888;
+      --color-bg-primary: #0a0a0a;
+      --color-bg-surface: #121212;
+      --color-border: #262626;
+      --color-border-light: #3a3a3a;
+      --color-text-primary: #ffffff;
+      --color-text-secondary: #888888;
+      --color-accent-cobalt: #60a5fa;
+      --color-accent-cyan: #06b6d4;
+      --color-accent-emerald: #10b981;
+      --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+    }
+
+    [data-theme="light"] {
+      --color-bg-primary: #f8f9fa;
+      --color-bg-surface: #ffffff;
+      --color-border: #e5e7eb;
+      --color-border-light: #d1d5db;
+      --color-text-primary: #0a0a0a;
+      --color-text-secondary: #4b5563;
+      --color-accent-cobalt: #1e40af;
+      --color-accent-cyan: #0891b2;
+      --color-void: #f8f9fa;
+      --color-charcoal: #ffffff;
+      --color-concrete: #e5e7eb;
+      --color-titanium: #0a0a0a;
+      --color-steel: #4b5563;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background-color: var(--color-bg-primary);
+      border-bottom: 1px solid var(--color-border);
+      transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .site-header.scrolled {
+      background-color: rgba(10, 10, 10, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom-color: var(--color-border-light);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="light"] .site-header.scrolled {
+      background-color: rgba(248, 249, 250, 0.88);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .site-header .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .site-header .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .site-header .bh-square-logo {
+      width: 32px;
+      height: 32px;
+      background-color: var(--color-text-primary);
+      color: var(--color-bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: -0.05em;
+      transition: transform 0.2s ease;
+    }
+
+    .site-header .brand-link:hover .bh-square-logo {
+      transform: scale(1.04);
+    }
+
+    .site-header .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .site-header .brand-name {
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+      line-height: 1.2;
+    }
+
+    .site-header .brand-title {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .site-header .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .site-header .desktop-nav {
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+    }
+
+    .site-header .nav-link {
+      font-family: var(--font-mono);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      transition: color 0.2s ease;
+      position: relative;
+    }
+
+    .site-header .nav-link:hover, .site-header .nav-link.active {
+      color: var(--color-text-primary);
+    }
+
+    .site-header .nav-link.active::after {
+      content: "";
+      position: absolute;
+      bottom: -6px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--color-accent-cyan);
+    }
+
+    .site-header .theme-toggle {
+      background: transparent;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-primary);
+      padding: 0.4rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .site-header .theme-toggle:hover {
+      border-color: var(--color-text-primary);
+    }
+
+    [data-theme="dark"] .site-header .moon-icon { display: none !important; }
+    [data-theme="dark"] .site-header .sun-icon { display: block !important; }
+    [data-theme="light"] .site-header .sun-icon { display: none !important; }
+    [data-theme="light"] .site-header .moon-icon { display: block !important; }
+
+    .site-header .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid var(--color-border);
+      padding: 6px;
+      cursor: pointer;
+    }
+
+    .site-header .hamburger-line {
+      width: 100%;
+      height: 2px;
+      background-color: var(--color-text-primary);
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .site-header .mobile-nav {
+      display: none;
+      flex-direction: column;
+      padding: 1.25rem 1.5rem;
+      background-color: var(--color-bg-primary);
+      border-bottom: 1px solid var(--color-border);
+      gap: 0.75rem;
+    }
+
+    .site-header .mobile-nav.open { display: flex; }
+
+    .site-header .mobile-nav-link {
+      font-family: var(--font-mono);
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      padding: 0.5rem 0;
+    }
+
+    .site-header .mobile-nav-link:hover, .site-header .mobile-nav-link.active {
+      color: var(--color-text-primary);
+    }
+
+    @media (max-width: 840px) {
+      .site-header .desktop-nav { display: none; }
+      .site-header .mobile-toggle { display: flex; }
+    }
+
+    /* Submenu (Dedicated Sticky Project Sub-Bar) */
+    .project-subnav {
+      position: sticky;
+      top: 64px;
+      z-index: 990;
+      background-color: var(--color-bg-surface);
+      border-bottom: 1px solid var(--color-border);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .project-subnav.scrolled {
+      background-color: rgba(18, 18, 18, 0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    [data-theme="light"] .project-subnav.scrolled {
+      background-color: rgba(255, 255, 255, 0.92);
+    }
+
+    .project-subnav .subnav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 48px;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      gap: 1rem;
+    }
+
+    .subnav-breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .subnav-crumb {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.15s ease;
+    }
+
+    .subnav-crumb:hover { color: var(--color-text-primary); }
+    .subnav-sep { color: var(--color-text-secondary); opacity: 0.5; }
+    .subnav-current { color: var(--color-text-primary); font-weight: 700; }
+
+    .subnav-badge {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.45rem;
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: var(--color-accent-cyan);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .subnav-menu {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      overflow-x: auto;
+    }
+
+    .subnav-link {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 0.15s ease;
+    }
+
+    .subnav-link:hover, .subnav-link.active { color: var(--color-accent-cyan); }
+    .subnav-link.github-link {
+      color: var(--color-text-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* Cmd+K Search Trigger & Modal Palette */
+    .header-search-btn {
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 0.45rem 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: all 0.15s ease;
+      min-width: 175px;
+    }
+
+    .header-search-btn:hover {
+      border-color: var(--color-accent-cobalt);
+      color: var(--color-text-primary);
+    }
+
+    .search-btn-content {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-btn-content svg {
+      width: 13px;
+      height: 13px;
+      stroke-width: 2.2;
+    }
+
+    .kbd-tag {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      background: var(--color-bg-primary);
+      border: 1px solid var(--color-border);
+      padding: 0.1rem 0.35rem;
+      color: var(--color-text-secondary);
+    }
+
+    .mobile-search-btn {
+      display: none;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-primary);
+      width: 36px;
+      height: 36px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .mobile-search-btn:hover { border-color: var(--color-accent-cobalt); }
+
+    .mobile-nav-search-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--color-bg-primary);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      padding: 0.75rem 1rem;
+      width: 100%;
+      cursor: pointer;
+      text-align: left;
+      margin-bottom: 0.5rem;
+    }
+
+    .mobile-nav-search-btn svg { color: var(--color-accent-cobalt); }
+
+    @media (max-width: 960px) {
+      .header-search-btn { min-width: 130px; padding: 0.4rem 0.6rem; gap: 0.5rem; }
+      .header-search-btn span:first-of-type { display: none; }
+      .header-search-btn .search-btn-content::after { content: "SEARCH"; }
+    }
+
+    @media (max-width: 768px) {
+      .header-search-btn { display: none; }
+      .mobile-search-btn { display: flex; }
+      .subnav-breadcrumbs { font-size: 0.72rem; }
+    }
+
+    /* Modal Overlay & Dialog */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 10, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 10vh 1rem 2rem;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .search-modal {
+      width: 100%;
+      max-width: 720px;
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+      max-height: 80vh;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      animation: modalPop 0.15s ease-out;
+    }
+
+    @keyframes modalPop {
+      0% { opacity: 0; transform: translateY(-8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      padding: 1.15rem 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      background: var(--color-bg-primary);
+    }
+
+    .modal-search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--color-text-primary);
+      font-size: 1.05rem;
+      font-family: var(--font-mono);
+      outline: none;
+    }
+
+    .modal-search-input::placeholder { color: var(--color-text-secondary); }
+
+    .modal-close-btn {
+      background: var(--color-bg-surface);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      padding: 0.35rem 0.65rem;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      cursor: pointer;
+    }
+
+    .modal-close-btn:hover {
+      color: var(--color-text-primary);
+      border-color: var(--color-text-primary);
+    }
+
+    .modal-filters {
+      display: flex;
+      gap: 0.4rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--color-bg-surface);
+      border-bottom: 1px solid var(--color-border);
+      overflow-x: auto;
+    }
+
+    .modal-filter-btn {
+      background: var(--color-bg-primary);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      white-space: nowrap;
+      text-transform: uppercase;
+      transition: all 0.15s ease;
+    }
+
+    .modal-filter-btn:hover {
+      color: var(--color-text-primary);
+      border-color: var(--color-border-light);
+    }
+
+    .modal-filter-btn.active {
+      background: var(--color-text-primary);
+      border-color: var(--color-text-primary);
+      color: var(--color-bg-primary);
+      font-weight: 700;
+    }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      background: var(--color-bg-primary);
+      max-height: 480px;
+    }
+
+    .modal-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      border: 1px solid transparent;
+      text-decoration: none;
+      color: var(--color-text-primary);
+      transition: background 0.12s ease;
+      cursor: pointer;
+    }
+
+    .modal-item:hover, .modal-item.selected {
+      background: var(--color-bg-surface);
+      border-color: var(--color-border);
+    }
+
+    .modal-item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 0;
+    }
+
+    .modal-item-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      font-family: var(--font-mono);
+      color: var(--color-text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .lang-box {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+    }
+
+    .modal-item-desc {
+      font-size: 0.82rem;
+      color: var(--color-text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 520px;
+    }
+
+    .modal-item-badge {
+      font-size: 0.7rem;
+      padding: 0.1rem 0.45rem;
+      background: var(--color-bg-primary);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+
+    .modal-empty {
+      padding: 3.5rem 1rem;
+      text-align: center;
+      color: var(--color-text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+    }
+
+    .modal-footer {
+      padding: 0.75rem 1.5rem;
+      background: var(--color-bg-surface);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--color-text-secondary);
+    }
+
+    .modal-hints { display: flex; gap: 1rem; }
+    .modal-hints kbd {
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-border);
+      padding: 0.1rem 0.35rem;
+      background: var(--color-bg-primary);
+    }
+
+  </style>
 </head>
 <body>
 
   <!-- Navigation -->
-  <header>
-    <div class="container nav-inner">
-      <a href="#" class="logo">
-        <span>active-ragdoll-rs</span>
-        <span class="logo-badge">RUST</span>
+    <!-- =============================================================
+       SITE HEADER (SYNCED WITH BRANDONHUBBARD.COM)
+       ============================================================= -->
+  <header class="site-header" id="topHeader">
+    <div class="header-content">
+      <a href="https://brandonhubbard.com/" class="brand-link">
+        <div class="bh-square-logo">
+          <span>BH</span>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">BRANDON HUBBARD</span>
+          <span class="brand-title">Senior Web Developer</span>
+        </div>
       </a>
-      <nav>
-        <ul class="nav-links">
-          <li><a href="#sandbox">Live 3D Sandbox</a></li>
-          <li><a href="#features">Features</a></li>
-          <li><a href="#architecture">Architecture</a></li>
-          <li><a href="#quickstart">Quickstart</a></li>
-          <li>
-            <a href="https://github.com/bhubbard/active-ragdoll-rs" target="_blank" rel="noopener noreferrer" class="github-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-              </svg>
-              <span>GitHub</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+
+      <div class="nav-controls">
+        <nav class="desktop-nav">
+          <a href="https://brandonhubbard.com/" class="nav-link">01. Home</a>
+          <a href="https://brandonhubbard.com/branding" class="nav-link">02. Branding</a>
+          <a href="https://brandonhubbard.com/blog" class="nav-link">03. Blog</a>
+          <a href="https://brandonhubbard.com/contact" class="nav-link">04. Contact</a>
+          <a href="https://webtools.brandonhubbard.com/" class="nav-link" target="_blank" rel="noopener noreferrer">05. Tools</a>
+          <a href="https://code.brandonhubbard.com/" class="nav-link active">06. Code</a>
+        </nav>
+
+        <!-- Cmd+K Search Trigger -->
+        <button type="button" class="header-search-btn" id="openSearchBtn" aria-label="Search open source repositories">
+          <div class="search-btn-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>SEARCH REPOS...</span>
+          </div>
+          <span class="kbd-tag"><span id="metaKey">⌘</span>K</span>
+        </button>
+
+        <button type="button" class="mobile-search-btn" id="openSearchMobileBtn" aria-label="Search repositories">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+
+        <!-- Theme Switcher Toggle -->
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light or dark theme" title="Toggle Light/Dark Theme">
+          <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <button id="mobile-toggle" class="mobile-toggle" aria-label="Toggle navigation menu">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Dropdown Navigation -->
+    <div id="mobile-nav" class="mobile-nav">
+      <button type="button" class="mobile-nav-search-btn" id="mobileNavSearchBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <span>Search Repositories (⌘K)</span>
+      </button>
+      <a href="https://brandonhubbard.com/" class="mobile-nav-link">01. Home</a>
+      <a href="https://brandonhubbard.com/branding" class="mobile-nav-link">02. Branding</a>
+      <a href="https://brandonhubbard.com/blog" class="mobile-nav-link">03. Blog</a>
+      <a href="https://brandonhubbard.com/contact" class="mobile-nav-link">04. Contact</a>
+      <a href="https://webtools.brandonhubbard.com/" class="mobile-nav-link" target="_blank" rel="noopener noreferrer">05. Tools</a>
+      <a href="https://code.brandonhubbard.com/" class="mobile-nav-link active">06. Code</a>
     </div>
   </header>
 
+  <!-- =============================================================
+       PROJECT SUBMENU (DEDICATED STICKY PROJECT SUB-BAR)
+       ============================================================= -->
+  <div class="project-subnav" id="projectSubnav">
+    <div class="subnav-inner">
+      <div class="subnav-breadcrumbs">
+        <a href="https://brandonhubbard.com/" class="subnav-crumb">Home</a>
+        <span class="subnav-sep">&gt;</span>
+        <a href="https://code.brandonhubbard.com/" class="subnav-crumb">Code</a>
+        <span class="subnav-sep">&gt;</span>
+        <span class="subnav-current">active-ragdoll-rs</span>
+        <span class="subnav-badge">CRATE v0.1.0</span>
+      </div>
+
+      <nav class="subnav-menu">
+        <a href="#overview" class="subnav-link active">Overview</a>
+        <a href="#sandbox" class="subnav-link">3D Sandbox</a>
+        <a href="#architecture" class="subnav-link">Architecture</a>
+        <a href="#quickstart" class="subnav-link">Quickstart</a>
+        <a href="https://github.com/bhubbard/active-ragdoll-rs" target="_blank" rel="noopener noreferrer" class="subnav-link github-link"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub ↗</a>
+      </nav>
+    </div>
+  </div>
+
   <!-- Hero Section -->
-  <section class="hero">
+  <section id="overview" class="hero">
     <div class="container">
       <div class="hero-pill">
         <span>⚡ Rust 2024 Edition</span>
@@ -417,6 +1117,1326 @@ fn main() -> Result<()> {
   </footer>
 
   <!-- App Simulation Script -->
-  <script type="module" src="app.js"></script>
+  
+  <!-- =============================================================
+       COMMAND PALETTE / SEARCH MODAL (CMD+K)
+       ============================================================= -->
+  <div class="modal-overlay" id="searchModalOverlay">
+    <div class="search-modal" role="dialog" aria-modal="true" aria-label="Search repositories">
+      <div class="modal-header">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="color: var(--color-accent-cobalt);">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="modalSearchInput" class="modal-search-input" placeholder="SEARCH ALL OPEN SOURCE REPOSITORIES..." autocomplete="off">
+        <button type="button" class="modal-close-btn" id="modalCloseBtn">ESC</button>
+      </div>
+
+      <div class="modal-filters">
+        <button type="button" class="modal-filter-btn active" data-filter="all">All</button>
+        <button type="button" class="modal-filter-btn" data-filter="pages">GitHub Pages (48)</button>
+        <button type="button" class="modal-filter-btn" data-filter="flare">The Flare Suite (4)</button>
+        <button type="button" class="modal-filter-btn" data-filter="astro">Chrome AI / Astro (13)</button>
+        <button type="button" class="modal-filter-btn" data-filter="cli">Rust &amp; CLI</button>
+        <button type="button" class="modal-filter-btn" data-filter="wordpress">WordPress (16)</button>
+        <button type="button" class="modal-filter-btn" data-filter="tools">Cloud &amp; Tools</button>
+      </div>
+
+      <div class="modal-body" id="modalResultsList">
+        <!-- Populated dynamically -->
+      </div>
+
+      <div class="modal-footer">
+        <div class="modal-hints">
+          <span><kbd>↑</kbd><kbd>↓</kbd> NAVIGATE</span>
+          <span><kbd>↵</kbd> OPEN</span>
+          <span><kbd>ESC</kbd> CLOSE</span>
+        </div>
+        <span id="modalMatchCount">SHOWING 87 REPOSITORIES</span>
+      </div>
+    </div>
+  </div>
+
+
+  <script type="module" src="app.js">
+
+    // ─── Header & Subnav Interactions ───────────────────────────
+    const mobileToggle = document.getElementById('mobile-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    if (mobileToggle && mobileNav) {
+      mobileToggle.addEventListener('click', () => {
+        mobileNav.classList.toggle('open');
+        mobileToggle.classList.toggle('active');
+      });
+    }
+
+    // Theme Switcher Toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        localStorage.setItem('bh-theme', newTheme);
+      });
+    }
+
+    // Header & Subnav Scroll Dynamics
+    function handleScroll() {
+      const siteHeader = document.getElementById('topHeader');
+      const projectSubnav = document.getElementById('projectSubnav');
+      const isScrolled = window.scrollY > 20;
+
+      if (siteHeader) {
+        siteHeader.classList.toggle('scrolled', isScrolled);
+      }
+      if (projectSubnav) {
+        projectSubnav.classList.toggle('scrolled', isScrolled);
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    // Kinetic Character Scramble Reveal on Tagline
+    (function initScramble() {
+      const titleEl = document.querySelector('.site-header .brand-title');
+      if (!titleEl) return;
+      const targetText = (titleEl.getAttribute('data-text') || titleEl.textContent || 'Senior Web Developer').trim();
+      titleEl.setAttribute('data-text', targetText);
+      const CHARS = '!<>/[]{}=+*^?#_~';
+      let frame = 0;
+      let frameCount = 0;
+
+      function scramble() {
+        let output = '';
+        let complete = 0;
+        for (let i = 0; i < targetText.length; i++) {
+          if (targetText[i] === ' ') {
+            output += ' ';
+            complete++;
+            continue;
+          }
+          if (i < Math.floor(frame / 2)) {
+            output += targetText[i];
+            complete++;
+          } else {
+            output += CHARS[Math.floor(Math.random() * CHARS.length)];
+          }
+        }
+        titleEl.textContent = output;
+        frame++;
+        if (complete < targetText.length && frameCount < 35) {
+          frameCount++;
+          requestAnimationFrame(scramble);
+        } else {
+          titleEl.textContent = targetText;
+        }
+      }
+
+      setTimeout(scramble, 250);
+      const brandLink = document.querySelector('.brand-link');
+      if (brandLink) brandLink.addEventListener('mouseenter', scramble);
+    })();
+
+    // ─── Command+K Search Modal Engine & Catalog ─────────────────
+    const GITHUB_PAGES_MAP = {
+      "active-ragdoll-rs": "https://code.brandonhubbard.com/active-ragdoll-rs/",
+      "aesir-utils-rs": "https://code.brandonhubbard.com/aesir-utils-rs/",
+      "apfel-rs": "https://code.brandonhubbard.com/apfel-rs/",
+      "astro-client-directive-ai": "https://code.brandonhubbard.com/astro-client-directive-ai/",
+      "astro-dev-audit-nano": "https://code.brandonhubbard.com/astro-dev-audit-nano/",
+      "astro-dev-broken-anchor-healer": "https://code.brandonhubbard.com/astro-dev-broken-anchor-healer/",
+      "astro-dev-content-linter": "https://code.brandonhubbard.com/astro-dev-content-linter/",
+      "astro-dev-copy-optimizer": "https://code.brandonhubbard.com/astro-dev-copy-optimizer/",
+      "astro-dev-i18n-coverage": "https://code.brandonhubbard.com/astro-dev-i18n-coverage/",
+      "astro-dev-island-hydration-advisor": "https://code.brandonhubbard.com/astro-dev-island-hydration-advisor/",
+      "astro-dev-mock-generator": "https://code.brandonhubbard.com/astro-dev-mock-generator/",
+      "astro-dev-schema-scaffolder": "https://code.brandonhubbard.com/astro-dev-schema-scaffolder/",
+      "astro-og-smart-crop": "https://code.brandonhubbard.com/astro-og-smart-crop/",
+      "astro-prefetch-ai-brief": "https://code.brandonhubbard.com/astro-prefetch-ai-brief/",
+      "astro-rehype-nano-code": "https://code.brandonhubbard.com/astro-rehype-nano-code/",
+      "astro-schema-ld-verifier": "https://code.brandonhubbard.com/astro-schema-ld-verifier/",
+      "bhubbard.github.io": "https://code.brandonhubbard.com/",
+      "bullet3-rs": "https://code.brandonhubbard.com/bullet3-rs/",
+      "clippy-cf-reporter": "https://code.brandonhubbard.com/clippy-cf-reporter/",
+      "defy-rs": "https://code.brandonhubbard.com/defy-rs/",
+      "detour-crowd-rs": "https://code.brandonhubbard.com/detour-crowd-rs/",
+      "dialogger-rs": "https://code.brandonhubbard.com/dialogger-rs/",
+      "flareguard": "https://code.brandonhubbard.com/flareguard/",
+      "flarelint": "https://code.brandonhubbard.com/flarelint/",
+      "flareops": "https://code.brandonhubbard.com/flareops/",
+      "flareperf": "https://code.brandonhubbard.com/flareperf/",
+      "gambetta-netcode-rs": "https://code.brandonhubbard.com/gambetta-netcode-rs/",
+      "godot-rs": "https://code.brandonhubbard.com/godot-rs/",
+      "hyperframes-rs": "https://code.brandonhubbard.com/hyperframes-rs/",
+      "minimal-hud-rs": "https://code.brandonhubbard.com/minimal-hud-rs/",
+      "npwd-rs": "https://code.brandonhubbard.com/npwd-rs/",
+      "openrw-rs": "https://code.brandonhubbard.com/openrw-rs/",
+      "poormans-camera-rs": "https://code.brandonhubbard.com/poormans-camera-rs/",
+      "radial-menu-rs": "https://code.brandonhubbard.com/radial-menu-rs/",
+      "sdf-math-rs": "https://code.brandonhubbard.com/sdf-math-rs/",
+      "sfxr-rs": "https://code.brandonhubbard.com/sfxr-rs/",
+      "simplecar2-rs": "https://code.brandonhubbard.com/simplecar2-rs/",
+      "sumo-rs": "https://code.brandonhubbard.com/sumo-rs/",
+      "tactical-ai-rs": "https://code.brandonhubbard.com/tactical-ai-rs/",
+      "talks": "https://talks.brandonhubbard.com/",
+      "tlab-vehicle-physics-rs": "https://code.brandonhubbard.com/tlab-vehicle-physics-rs/",
+      "uxsim-rs": "https://code.brandonhubbard.com/uxsim-rs/",
+      "vhud-rs": "https://code.brandonhubbard.com/vhud-rs/",
+      "video-use-rs": "https://code.brandonhubbard.com/video-use-rs/",
+      "vite-plus-commitlint": "https://code.brandonhubbard.com/vite-plus-commitlint/",
+      "vite-plus-kumo-ui": "https://code.brandonhubbard.com/vite-plus-kumo-ui/",
+      "vite-plus-wrangler": "https://code.brandonhubbard.com/vite-plus-wrangler/",
+      "zev-rs": "https://code.brandonhubbard.com/zev-rs/"
+    };
+
+    const REPOSITORIES = [
+      // 🎯 Flagship 3D Physics & Simulation Systems
+      {
+        name: "bullet3-rs",
+        description: "Pure Rust real-time rigid body and multi-body 3D physics simulation engine with SIMD vectorization, GJK/EPA collision, and constraint solver.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust", "physics"],
+        stars: 0,
+        url: "https://github.com/bhubbard/bullet3-rs",
+        docs: "https://code.brandonhubbard.com/bullet3-rs/",
+        install: "cargo add bullet3-rs"
+      },
+      {
+        name: "active-ragdoll-rs",
+        description: "Pure Rust active ragdoll physics, PID balance controllers, and animated skeletal joint torque simulation.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust", "physics"],
+        stars: 0,
+        url: "https://github.com/bhubbard/active-ragdoll-rs",
+        docs: "https://code.brandonhubbard.com/active-ragdoll-rs/",
+        install: "cargo add active-ragdoll-rs"
+      },
+      {
+        name: "detour-crowd-rs",
+        description: "Pure Rust port of DetourCrowd from RecastNavigation: RVO collision avoidance, proximity grid, and crowd path steering.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/detour-crowd-rs",
+        docs: "https://code.brandonhubbard.com/detour-crowd-rs/",
+        install: "cargo add detour-crowd-rs"
+      },
+      {
+        name: "tlab-vehicle-physics-rs",
+        description: "Pure Rust Pacejka Magic Formula tire friction and drift physics model from TLabVehiclePhysics.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust", "physics"],
+        stars: 0,
+        url: "https://github.com/bhubbard/tlab-vehicle-physics-rs",
+        docs: "https://code.brandonhubbard.com/tlab-vehicle-physics-rs/",
+        install: "cargo add tlab-vehicle-physics-rs"
+      },
+      {
+        name: "simplecar2-rs",
+        description: "Pure Rust arcade-sim vehicle dynamics, raycast suspension, drivetrain, and transmission from SimpleCar2.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust", "physics"],
+        stars: 0,
+        url: "https://github.com/bhubbard/simplecar2-rs",
+        docs: "https://code.brandonhubbard.com/simplecar2-rs/",
+        install: "cargo add simplecar2-rs"
+      },
+      {
+        name: "sumo-rs",
+        description: "Pure Rust microscopic traffic simulation engine featuring IDM, Krauss car-following, MOBIL lane changing, and intersection right-of-way from SUMO.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/sumo-rs",
+        docs: "https://code.brandonhubbard.com/sumo-rs/",
+        install: "cargo add sumo-rs"
+      },
+      {
+        name: "uxsim-rs",
+        description: "Pure Rust macroscopic city-wide traffic network flow simulator from UXsim.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/uxsim-rs",
+        docs: "https://code.brandonhubbard.com/uxsim-rs/",
+        install: "cargo add uxsim-rs"
+      },
+      {
+        name: "openrw-rs",
+        description: "Pure Rust port of GTA III camera follow, weapon targeting math, and player state machines from OpenRW.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/openrw-rs",
+        docs: "https://code.brandonhubbard.com/openrw-rs/",
+        install: "cargo add openrw-rs"
+      },
+      {
+        name: "godot-rs",
+        description: "Pure Rust port and architecture fork of Godot Engine (godotengine/godot).",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/godot-rs",
+        docs: "https://code.brandonhubbard.com/godot-rs/",
+        install: "cargo add godot-rs"
+      },
+      {
+        name: "tactical-ai-rs",
+        description: "Pure Rust tactical influence maps, spatial reasoning, cover finding, and flanking pathfinder from Game AI Pro.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust", "ai"],
+        stars: 0,
+        url: "https://github.com/bhubbard/tactical-ai-rs",
+        docs: "https://code.brandonhubbard.com/tactical-ai-rs/",
+        install: "cargo add tactical-ai-rs"
+      },
+      {
+        name: "dialogger-rs",
+        description: "Pure Rust branching dialogue graph evaluator and NPC bark engine from Dialogger.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/dialogger-rs",
+        docs: "https://code.brandonhubbard.com/dialogger-rs/",
+        install: "cargo add dialogger-rs"
+      },
+      {
+        name: "sfxr-rs",
+        description: "Pure Rust procedural 8-bit/16-bit sound effect generator and synthesizer from SFXR.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/sfxr-rs",
+        docs: "https://code.brandonhubbard.com/sfxr-rs/",
+        install: "cargo add sfxr-rs"
+      },
+      {
+        name: "sdf-math-rs",
+        description: "Pure Rust 2D and 3D Signed Distance Fields, CSG smooth blending, and ray marching from Inigo Quilez.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/sdf-math-rs",
+        docs: "https://code.brandonhubbard.com/sdf-math-rs/",
+        install: "cargo add sdf-math-rs"
+      },
+      {
+        name: "hyperframes-rs",
+        description: "High-performance Rust sprite sheet, skeletal animation frames, and procedural tweening engine.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/hyperframes-rs",
+        docs: "https://code.brandonhubbard.com/hyperframes-rs/",
+        install: "cargo add hyperframes-rs"
+      },
+      {
+        name: "gambetta-netcode-rs",
+        description: "Pure Rust client-side prediction, server reconciliation, entity interpolation, and lag compensation netcode from Gabriel Gambetta.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/gambetta-netcode-rs",
+        docs: "https://code.brandonhubbard.com/gambetta-netcode-rs/",
+        install: "cargo add gambetta-netcode-rs"
+      },
+      {
+        name: "poormans-camera-rs",
+        description: "Pure Rust 3D third-person camera rig with sphere-cast collision avoidance and spring damping from Evan Todd.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/poormans-camera-rs",
+        docs: "https://code.brandonhubbard.com/poormans-camera-rs/",
+        install: "cargo add poormans-camera-rs"
+      },
+      {
+        name: "minimal-hud-rs",
+        description: "Pure Rust event-driven HUD state tracking, dirty change detection, vital stats, and vehicle telemetry from minimal-hud.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/minimal-hud-rs",
+        docs: "https://code.brandonhubbard.com/minimal-hud-rs/",
+        install: "cargo add minimal-hud-rs"
+      },
+      {
+        name: "npwd-rs",
+        description: "Pure Rust simulated in-game smartphone architecture, OS state machine, apps, and game-world event bridge from NPWD.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/npwd-rs",
+        docs: "https://code.brandonhubbard.com/npwd-rs/",
+        install: "cargo add npwd-rs"
+      },
+      {
+        name: "vhud-rs",
+        description: "Pure Rust GTA V radar, minimap projection, blip clamping, GPS route, and HUD ring meter engine.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/vhud-rs",
+        docs: "https://code.brandonhubbard.com/vhud-rs/",
+        install: "cargo add vhud-rs"
+      },
+      {
+        name: "radial-menu-rs",
+        description: "Pure Rust radial menu and weapon wheel system with angle math, deadzone filtering, and easing animations.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/radial-menu-rs",
+        docs: "https://code.brandonhubbard.com/radial-menu-rs/",
+        install: "cargo add radial-menu-rs"
+      },
+      {
+        name: "aesir-utils-rs",
+        description: "Pure Rust screen safezone, aspect ratio correction, and UI anchor positioning engine from FiveM aesir_utils.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/aesir-utils-rs",
+        docs: "https://code.brandonhubbard.com/aesir-utils-rs/",
+        install: "cargo add aesir-utils-rs"
+      },
+      {
+        name: "defy-rs",
+        description: "Pure Rust port of police wanted-level, pursuit dispatch, and NPC crime interaction systems from Defy.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/defy-rs",
+        docs: "https://code.brandonhubbard.com/defy-rs/",
+        install: "cargo add defy-rs"
+      },
+      // 🚀 Flagship Rust & Local AI Systems
+      {
+        name: "apfel-rs",
+        description: "Apple Intelligence on-device FoundationModels in pure Rust. UNIX CLI & OpenAI-compatible HTTP daemon with 4,160 req/s throughput.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust", "ai"],
+        stars: 0,
+        url: "https://github.com/bhubbard/apfel-rs",
+        docs: "https://bhubbard.github.io/apfel-rs/",
+        install: "cargo install apfel-rs"
+      },
+      {
+        name: "zev-rs",
+        description: "Ultra-fast zero-token LLM decision engine. 0.37ms latency, 70.1% JevBench accuracy, 0% order bias, and zero GPU requirement.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust", "ai"],
+        stars: 0,
+        url: "https://github.com/bhubbard/zev-rs",
+        docs: "https://bhubbard.github.io/zev-rs/",
+        install: "cargo install zev-rs"
+      },
+      {
+        name: "video-use-rs",
+        description: "High-performance Rust toolkit for conversation-driven video editing with AI coding agents. Phrase packing, lossless concat, and auto grading.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust", "ai"],
+        stars: 0,
+        url: "https://github.com/bhubbard/video-use-rs",
+        docs: "https://bhubbard.github.io/video-use-rs/",
+        install: "cargo install video-use-rs"
+      },
+      // 🛡️ The Flare Suite (Flagships)
+      {
+        name: "flareguard",
+        description: "Cloudflare Security, Secret Leaks, Binding Validation, Zone Posture, and Certificate Transparency Origin IP Hunting.",
+        language: "Rust",
+        category: "flare",
+        categories: ["flare", "cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/flareguard",
+        docs: "https://bhubbard.github.io/flareguard/",
+        install: "cargo install flareguard"
+      },
+      {
+        name: "flareperf",
+        description: "Edge Performance, Bundle Budgets, V8 Isolate Cold-Start analysis, 50-Subrequest Limits, and D1 Batching.",
+        language: "Rust",
+        category: "flare",
+        categories: ["flare", "cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/flareperf",
+        docs: "https://bhubbard.github.io/flareperf/",
+        install: "cargo install flareperf"
+      },
+      {
+        name: "flarelint",
+        description: "OXC-Powered AST Static Analysis, Node.js Compatibility, ctx.waitUntil Linter, and Durable Objects Safety.",
+        language: "Rust",
+        category: "flare",
+        categories: ["flare", "cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/flarelint",
+        docs: "https://bhubbard.github.io/flarelint/",
+        install: "cargo install flarelint"
+      },
+      {
+        name: "flareops",
+        description: "DevEx, Wrangler Binding Sync, .dev.vars Migrations, and Pages _routes.json Optimizer.",
+        language: "Rust",
+        category: "flare",
+        categories: ["flare", "cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/flareops",
+        docs: "https://bhubbard.github.io/flareops/",
+        install: "cargo install flareops"
+      },
+
+      // 🤖 Astro Chrome Built-in AI Suite (13 Packages)
+      {
+        name: "astro-client-directive-ai",
+        description: "Custom Astro client directive (client:ai-ready) delaying component hydration until on-device Gemini Nano is ready.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-client-directive-ai",
+        docs: "./astro-client-directive-ai/",
+        install: "bun add astro-client-directive-ai"
+      },
+      {
+        name: "astro-rehype-nano-code",
+        description: "Zero-JS interactive code block explainer for Astro using build-time Rehype attributes and on-device Chrome AI.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-rehype-nano-code",
+        docs: "./astro-rehype-nano-code/",
+        install: "bun add astro-rehype-nano-code"
+      },
+      {
+        name: "astro-prefetch-ai-brief",
+        description: "Intelligent link hover briefs for Astro with ultra-compact previews generated by Chrome Built-in Summarizer API.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-prefetch-ai-brief",
+        docs: "./astro-prefetch-ai-brief/",
+        install: "bun add astro-prefetch-ai-brief"
+      },
+      {
+        name: "astro-dev-audit-nano",
+        description: "Astro Dev Toolbar app auditing WCAG a11y, heading hierarchy, and SEO with real-time Gemini Nano remediations.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-dev-audit-nano",
+        docs: "./astro-dev-audit-nano/",
+        install: "bun add astro-dev-audit-nano"
+      },
+      {
+        name: "astro-dev-copy-optimizer",
+        description: "In-browser copy tuner and rewriter inside the Astro Dev Toolbar powered by Chrome Built-in AI.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-dev-copy-optimizer",
+        docs: "./astro-dev-copy-optimizer/",
+        install: "bun add astro-dev-copy-optimizer"
+      },
+      {
+        name: "astro-og-smart-crop",
+        description: "Client-side OpenGraph and Twitter card preview simulator with AI character-budgeted headline optimization.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-og-smart-crop",
+        docs: "./astro-og-smart-crop/",
+        install: "bun add astro-og-smart-crop"
+      },
+      {
+        name: "astro-schema-ld-verifier",
+        description: "Dev-time semantic consistency auditor verifying JSON-LD structured data against rendered DOM content.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-schema-ld-verifier",
+        docs: "./astro-schema-ld-verifier/",
+        install: "bun add astro-schema-ld-verifier"
+      },
+      {
+        name: "astro-dev-i18n-coverage",
+        description: "Dev Toolbar missing translation finder with contextual on-device translation and 1-click locale JSON export.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-dev-i18n-coverage",
+        docs: "./astro-dev-i18n-coverage/",
+        install: "bun add astro-dev-i18n-coverage"
+      },
+      {
+        name: "astro-dev-content-linter",
+        description: "Editorial tone, reading grade level, and brand voice auditor inside the Astro Dev Toolbar with AI rewrites.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-dev-content-linter",
+        docs: "./astro-dev-content-linter/",
+        install: "bun add astro-dev-content-linter"
+      },
+      {
+        name: "astro-dev-schema-scaffolder",
+        description: "Instant Schema.org JSON-LD microdata generator for Astro Dev Toolbar powered by on-device Gemini Nano.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-dev-schema-scaffolder",
+        docs: "./astro-dev-schema-scaffolder/",
+        install: "bun add astro-dev-schema-scaffolder"
+      },
+      {
+        name: "astro-dev-mock-generator",
+        description: "Synthetic Zod-compliant mock data generator for Astro Content Collections using on-device Gemini Nano.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-dev-mock-generator",
+        docs: "./astro-dev-mock-generator/",
+        install: "bun add astro-dev-mock-generator"
+      },
+      {
+        name: "astro-dev-broken-anchor-healer",
+        description: "Smart internal anchor link validator and semantic heading ID matcher for Astro Dev Toolbar.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-dev-broken-anchor-healer",
+        docs: "./astro-dev-broken-anchor-healer/",
+        install: "bun add astro-dev-broken-anchor-healer"
+      },
+      {
+        name: "astro-dev-island-hydration-advisor",
+        description: "Astro Dev Toolbar island hydration analyzer flagging eager below-the-fold directives with performance advice.",
+        language: "TypeScript",
+        category: "astro",
+        categories: ["astro"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-dev-island-hydration-advisor",
+        docs: "./astro-dev-island-hydration-advisor/",
+        install: "bun add astro-dev-island-hydration-advisor"
+      },
+
+      // 🦀 Rust & Edge Developer Tools
+      {
+        name: "oxc-astro-cf",
+        description: "Static AST linter detecting illegal access to Cloudflare runtime bindings inside static prerendered Astro pages.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/oxc-astro-cf",
+        install: "cargo install oxc-astro-cf"
+      },
+      {
+        name: "edge-bundle-budget",
+        description: "Audits gzip/brotli sizes against Cloudflare Worker tier quotas, inspects sourcemaps, and decomposes .wasm binaries.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/edge-bundle-budget",
+        install: "cargo install edge-bundle-budget"
+      },
+      {
+        name: "cf-origin-hunter",
+        description: "Discovers unmasked origin IPs behind Cloudflare proxies via DNS records, Certificate Transparency, and direct probes.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/cf-origin-hunter",
+        install: "cargo install cf-origin-hunter"
+      },
+      {
+        name: "cf-zone-auditor",
+        description: "Multi-zone Cloudflare security auditor verifying SSL/TLS strictness, HSTS, WAF rulesets, and DNSSEC.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/cf-zone-auditor",
+        install: "cargo install cf-zone-auditor"
+      },
+      {
+        name: "astro-binding-sync",
+        description: "Synchronizes wrangler.jsonc resources with TypeScript App.Locals and env.d.ts definitions.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-binding-sync",
+        install: "cargo install astro-binding-sync"
+      },
+      {
+        name: "cf-secret-leak-guard",
+        description: "High-throughput scanner preventing Cloudflare tokens, Turnstile keys, and secrets from leaking into client builds.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/cf-secret-leak-guard",
+        install: "cargo install cf-secret-leak-guard"
+      },
+      {
+        name: "astro-env-migration",
+        description: "AST codemod migrating deprecated Astro.locals.runtime.* references to modern standard Cloudflare bindings.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-env-migration",
+        install: "cargo install astro-env-migration"
+      },
+      {
+        name: "cf-binding-validator",
+        description: "Eliminates ghost bindings in wrangler.jsonc and flags runtime crashes from undeclared env.* access.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/cf-binding-validator",
+        install: "cargo install cf-binding-validator"
+      },
+      {
+        name: "astro-cf-session",
+        description: "Validates Astro Session API configurations against Wrangler KV bindings to prevent auto-provisioning errors.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-cf-session",
+        install: "cargo install astro-cf-session"
+      },
+      {
+        name: "cf-routes-json",
+        description: "Validates, minimizes, and detects route conflicts in Cloudflare Pages _routes.json files.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/cf-routes-json",
+        install: "cargo install cf-routes-json"
+      },
+      {
+        name: "astro-asset-headers",
+        description: "Validates and generates Cloudflare Pages _headers caching and security rules for Astro assets.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/astro-asset-headers",
+        install: "cargo install astro-asset-headers"
+      },
+      {
+        name: "clippy-cf-reporter",
+        description: "Translates worker-rs Clippy compiler diagnostics into Code Climate JSON, SARIF v2.1.0, and PR annotations.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/clippy-cf-reporter",
+        install: "cargo install clippy-cf-reporter"
+      },
+      {
+        name: "brandon-cli",
+        description: "Comprehensive developer productivity CLI for Brandon Hubbard's multi-project workflows.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/brandon-cli",
+        install: "cargo install brandon-cli"
+      },
+      {
+        name: "vite-plus-commitlint",
+        description: "A commitlint plugin tailored for Vite+ toolchain workflows.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/vite-plus-commitlint"
+      },
+      {
+        name: "vite-plus-kumo-ui",
+        description: "High-performance Rust integration bindings for Kumo UI inside Vite+ stacks.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 1,
+        url: "https://github.com/bhubbard/vite-plus-kumo-ui"
+      },
+      {
+        name: "vite-plus-wrangler",
+        description: "Direct Wrangler Cloudflare bindings integration for the Vite+ unified toolchain.",
+        language: "Rust",
+        category: "cli",
+        categories: ["cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/vite-plus-wrangler"
+      },
+
+      // 🌐 WordPress Ecosystem
+      {
+        name: "wp-blockmarkup-mcp",
+        description: "A fast, lightweight Rust Model Context Protocol (MCP) server and CLI for auditing, linting, and previewing Gutenberg block markups.",
+        language: "Rust",
+        category: "wordpress",
+        categories: ["wordpress", "cli", "rust"],
+        stars: 0,
+        url: "https://github.com/bhubbard/wp-blockmarkup-mcp",
+        install: "cargo install wp-blockmarkup-mcp"
+      },
+      {
+        name: "wp-cloudflare-d1",
+        description: "A PHP class to query and utilize Cloudflare D1 serverless SQL database within WordPress.",
+        language: "PHP",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 2,
+        url: "https://github.com/bhubbard/wp-cloudflare-d1"
+      },
+      {
+        name: "wp-cloudflare-kv",
+        description: "A modern WordPress library to interface with Cloudflare KV storage at the edge.",
+        language: "PHP",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 1,
+        url: "https://github.com/bhubbard/wp-cloudflare-kv"
+      },
+      {
+        name: "wp-gemini-cleaner",
+        description: "A WordPress tool for cleaning and sanitizing Gemini AI-generated editorial content.",
+        language: "PHP",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 1,
+        url: "https://github.com/bhubbard/wp-gemini-cleaner"
+      },
+      {
+        name: "wp-theme-check-cli",
+        description: "A TypeScript CLI port of the WordPress Theme Check tool with modern auditing extras.",
+        language: "TypeScript",
+        category: "wordpress",
+        categories: ["wordpress", "cli"],
+        stars: 0,
+        url: "https://github.com/bhubbard/wp-theme-check-cli"
+      },
+      {
+        name: "wp-pressable-api",
+        description: "PHP client library for the Pressable Managed Hosting API.",
+        language: "PHP",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 1,
+        url: "https://github.com/bhubbard/wp-pressable-api"
+      },
+      {
+        name: "wp-givebutter-api",
+        description: "A WordPress integration library for the GiveButter public fundraising API.",
+        language: "PHP",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 0,
+        url: "https://github.com/bhubbard/wp-givebutter-api"
+      },
+      {
+        name: "wp-lawmatics-api",
+        description: "A WordPress integration client for the Lawmatics Legal CRM API.",
+        language: "PHP",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 0,
+        url: "https://github.com/bhubbard/wp-lawmatics-api"
+      },
+      {
+        name: "wp-clio-api",
+        description: "A WordPress library for communicating with the Clio Legal Practice Management API.",
+        language: "PHP",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 0,
+        url: "https://github.com/bhubbard/wp-clio-api"
+      },
+      {
+        name: "wp-spinupwp-api",
+        description: "A WordPress PHP wrapper for the SpinupWP cloud server management API.",
+        language: "PHP",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 1,
+        url: "https://github.com/bhubbard/wp-spinupwp-api"
+      },
+      {
+        name: "wp-cleanup-scripts",
+        description: "A collection of bash scripts and SQL routines to purge leftover data from WP plugins and themes.",
+        language: "Shell",
+        category: "wordpress",
+        categories: ["wordpress", "tools"],
+        stars: 0,
+        url: "https://github.com/bhubbard/wp-cleanup-scripts"
+      },
+      {
+        name: "wp-plugin-uninstalls",
+        description: "A curated collection of clean WordPress plugin uninstall handlers and database purgers.",
+        language: "PHP",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 0,
+        url: "https://github.com/bhubbard/wp-plugin-uninstalls"
+      },
+      {
+        name: "rest-api-examples",
+        description: "Clean boilerplate examples of custom REST endpoints for high-throughput WordPress apps.",
+        language: "PHP",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 2,
+        url: "https://github.com/bhubbard/rest-api-examples"
+      },
+      {
+        name: "sensitive-image-block",
+        description: "A WordPress Gutenberg block for blurring sensitive imagery behind an interactive user reveal toggle.",
+        language: "JavaScript",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 0,
+        url: "https://github.com/bhubbard/sensitive-image-block"
+      },
+      {
+        name: "post-navigation-block",
+        description: "A Gutenberg block providing accessible prev/next post navigation links.",
+        language: "PHP",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 0,
+        url: "https://github.com/bhubbard/post-navigation-block"
+      },
+      {
+        name: "animated-gradient-cover-block",
+        description: "An animated gradient cover block for modern WordPress Gutenberg layouts.",
+        language: "JavaScript",
+        category: "wordpress",
+        categories: ["wordpress"],
+        stars: 1,
+        url: "https://github.com/bhubbard/animated-gradient-cover-block"
+      },
+
+      // ⚙️ Cloud & Automation Tools
+      {
+        name: "alt-text-ai",
+        description: "Generate SEO-friendly, accessibility-focused alt text for images using Cloudflare Workers AI.",
+        language: "TypeScript",
+        category: "tools",
+        categories: ["tools"],
+        stars: 0,
+        url: "https://github.com/bhubbard/alt-text-ai"
+      },
+      {
+        name: "antispambot-cf-worker",
+        description: "A lightweight Cloudflare Worker that dynamically obfuscates email addresses to eliminate spam harvesters.",
+        language: "JavaScript",
+        category: "tools",
+        categories: ["tools"],
+        stars: 4,
+        url: "https://github.com/bhubbard/antispambot-cf-worker"
+      },
+      {
+        name: "pressable-cli",
+        description: "Fast command-line interface for provisioning, cloning, and managing Pressable WordPress sites.",
+        language: "TypeScript",
+        category: "tools",
+        categories: ["tools", "cli"],
+        stars: 1,
+        url: "https://github.com/bhubbard/pressable-cli"
+      },
+      {
+        name: "sitemap-scan",
+        description: "A fast Node CLI utility to crawl, discover, validate, and extract XML sitemaps.",
+        language: "JavaScript",
+        category: "tools",
+        categories: ["tools", "cli"],
+        stars: 0,
+        url: "https://github.com/bhubbard/sitemap-scan"
+      },
+      {
+        name: "kumo-drift-checks",
+        description: "Continuous infrastructure drift verification and compliance auditor.",
+        language: "JavaScript",
+        category: "tools",
+        categories: ["tools"],
+        stars: 1,
+        url: "https://github.com/bhubbard/kumo-drift-checks"
+      },
+      {
+        name: "skills",
+        description: "Autonomous agent skill definitions and execution patterns for AI pair programmers.",
+        language: "JavaScript",
+        category: "tools",
+        categories: ["tools"],
+        stars: 1,
+        url: "https://github.com/bhubbard/skills"
+      },
+      {
+        name: "plugin-updater-cf-worker",
+        description: "A Cloudflare Worker proxying private WordPress plugin updates with license key authentication.",
+        language: "JavaScript",
+        category: "tools",
+        categories: ["tools"],
+        stars: 0,
+        url: "https://github.com/bhubbard/plugin-updater-cf-worker"
+      },
+      {
+        name: "send-to-pubsub",
+        description: "High-concurrency HTTP Cloud Function to stream webhook events directly into Google Cloud Pub/Sub.",
+        language: "JavaScript",
+        category: "tools",
+        categories: ["tools"],
+        stars: 1,
+        url: "https://github.com/bhubbard/send-to-pubsub"
+      },
+      {
+        name: "gcf-pubsub-webhook",
+        description: "A resilient cloud function to receive incoming webhooks and broadcast to Pub/Sub topics.",
+        language: "JavaScript",
+        category: "tools",
+        categories: ["tools"],
+        stars: 1,
+        url: "https://github.com/bhubbard/gcf-pubsub-webhook"
+      },
+      {
+        name: "woo-order-to-google-storage",
+        description: "Streams WooCommerce order JSON backups directly into Google Cloud Storage via Pub/Sub.",
+        language: "JavaScript",
+        category: "tools",
+        categories: ["tools"],
+        stars: 1,
+        url: "https://github.com/bhubbard/woo-order-to-google-storage"
+      },
+      {
+        name: "yoast-seo-audit",
+        description: "Automated SEO meta tag and schema integrity verification tool for Yoast SEO installations.",
+        language: "JavaScript",
+        category: "tools",
+        categories: ["tools"],
+        stars: 1,
+        url: "https://github.com/bhubbard/yoast-seo-audit"
+      },
+      {
+        name: "talks",
+        description: "Brandon Hubbard's conference talks, slides, and technical presentations.",
+        language: "JavaScript",
+        category: "tools",
+        categories: ["tools"],
+        stars: 1,
+        url: "https://github.com/bhubbard/talks"
+      },
+      {
+        name: "bhubbard.github.io",
+        description: "Official Open Source Software Portal & Master Engineering Hub by Brandon Hubbard.",
+        language: "HTML",
+        category: "tools",
+        categories: ["tools"],
+        stars: 0,
+        url: "https://github.com/bhubbard/bhubbard.github.io"
+      }
+    ];
+
+    const LANG_COLORS = {
+      "TypeScript": "#3B82F6",
+      "Rust": "#06B6D4",
+      "JavaScript": "#10B981",
+      "PHP": "#3B82F6",
+      "HTML": "#F43F5E",
+      "Shell": "#10B981",
+      "CSS": "#3B82F6"
+    };
+
+    function getProjectTargetUrl(repo) {
+      if (!repo) return "#";
+      const name = (repo.name || "").toLowerCase().trim();
+      if (GITHUB_PAGES_MAP[name]) {
+        return GITHUB_PAGES_MAP[name];
+      }
+      if (repo.docs && repo.docs !== "#") {
+        return repo.docs;
+      }
+      return repo.url || "https://github.com/bhubbard/" + name;
+    }
+
+    let activeModalFilter = "all";
+    let selectedModalIndex = 0;
+    let filteredModalRepos = [];
+
+    const openSearchBtn = document.getElementById("openSearchBtn");
+    const openSearchMobileBtn = document.getElementById("openSearchMobileBtn");
+    const mobileNavSearchBtn = document.getElementById("mobileNavSearchBtn");
+    const searchModalOverlay = document.getElementById("searchModalOverlay");
+    const modalCloseBtn = document.getElementById("modalCloseBtn");
+    const modalSearchInput = document.getElementById("modalSearchInput");
+    const modalResultsList = document.getElementById("modalResultsList");
+    const modalMatchCount = document.getElementById("modalMatchCount");
+    const modalFilterBtns = document.querySelectorAll(".modal-filter-btn");
+
+    const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0 || navigator.userAgent.toUpperCase().indexOf("MAC") >= 0;
+    const metaKeyElement = document.getElementById("metaKey");
+    if (metaKeyElement && !isMac) {
+      metaKeyElement.textContent = "Ctrl ";
+    }
+
+    function matchCategory(repo, filter) {
+      if (filter === "all") return true;
+      if (filter === "pages") return Boolean(GITHUB_PAGES_MAP[(repo.name || "").toLowerCase()] || repo.docs);
+      if (repo.category === filter) return true;
+      if (repo.categories && repo.categories.includes(filter)) return true;
+      return false;
+    }
+
+    function renderModalResults() {
+      if (!modalSearchInput || !modalResultsList) return;
+      const query = (modalSearchInput.value || "").toLowerCase().trim();
+      filteredModalRepos = REPOSITORIES.filter(repo => {
+        const matchesCat = matchCategory(repo, activeModalFilter);
+        const matchesQuery = !query || 
+          repo.name.toLowerCase().includes(query) || 
+          (repo.description && repo.description.toLowerCase().includes(query)) ||
+          (repo.language && repo.language.toLowerCase().includes(query));
+        return matchesCat && matchesQuery;
+      });
+
+      if (modalMatchCount) {
+        modalMatchCount.textContent = "SHOWING " + filteredModalRepos.length + " OF " + REPOSITORIES.length + " REPOSITORIES";
+      }
+
+      if (filteredModalRepos.length === 0) {
+        modalResultsList.innerHTML = '<div class="modal-empty">NO REPOSITORIES FOUND MATCHING "' + query + '"</div>';
+        return;
+      }
+
+      if (selectedModalIndex >= filteredModalRepos.length) {
+        selectedModalIndex = 0;
+      }
+
+      modalResultsList.innerHTML = filteredModalRepos.map((repo, idx) => {
+        const isSelected = idx === selectedModalIndex;
+        const langColor = LANG_COLORS[repo.language] || "var(--color-text-secondary)";
+        const targetUrl = getProjectTargetUrl(repo);
+        const hasPage = Boolean(GITHUB_PAGES_MAP[(repo.name || "").toLowerCase()] || repo.docs);
+        return '<a href="' + targetUrl + '" target="_blank" rel="noopener" class="modal-item ' + (isSelected ? 'selected' : '') + '" data-idx="' + idx + '">' +
+          '<div class="modal-item-info">' +
+            '<div class="modal-item-title">' +
+              '<span>' + repo.name + '</span>' +
+              '<span class="modal-item-badge" style="display: inline-flex; align-items: center; gap: 4px;">' +
+                '<span class="lang-box" style="background-color: ' + langColor + ';"></span>' +
+                (repo.language || "Code") +
+              '</span>' +
+              (repo.stars > 0 ? '<span class="modal-item-badge">★ ' + repo.stars + '</span>' : '') +
+              (hasPage ? '<span class="modal-item-badge" style="color: var(--color-accent-cyan); border-color: rgba(6,182,212,0.3); font-weight: 600;">GitHub Page</span>' : '') +
+            '</div>' +
+            '<div class="modal-item-desc">' + (repo.description || "Open source repository by Brandon Hubbard.") + '</div>' +
+          '</div>' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.5; flex-shrink: 0;"><path d="M9 18l6-6-6-6"></path></svg>' +
+        '</a>';
+      }).join("");
+
+      const selectedEl = modalResultsList.querySelector(".modal-item.selected");
+      if (selectedEl && typeof selectedEl.scrollIntoView === 'function') {
+        selectedEl.scrollIntoView({ block: "nearest" });
+      }
+    }
+
+    function openModal(initialCategory) {
+      if (!searchModalOverlay) return;
+      if (initialCategory) {
+        activeModalFilter = initialCategory;
+        modalFilterBtns.forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.filter === initialCategory);
+        });
+      }
+      searchModalOverlay.classList.add("active");
+      if (modalSearchInput) {
+        modalSearchInput.value = "";
+        setTimeout(() => {
+          modalSearchInput.focus();
+          modalSearchInput.select();
+        }, 50);
+      }
+      selectedModalIndex = 0;
+      renderModalResults();
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      if (!searchModalOverlay) return;
+      searchModalOverlay.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+
+    if (openSearchBtn) openSearchBtn.addEventListener("click", () => openModal());
+    if (openSearchMobileBtn) openSearchMobileBtn.addEventListener("click", () => openModal());
+    if (mobileNavSearchBtn) mobileNavSearchBtn.addEventListener("click", () => {
+      if (mobileNav && mobileNav.classList.contains("open")) {
+        mobileNav.classList.remove("open");
+        if (mobileToggle) mobileToggle.classList.remove("active");
+      }
+      openModal();
+    });
+    if (modalCloseBtn) modalCloseBtn.addEventListener("click", closeModal);
+
+    if (searchModalOverlay) {
+      searchModalOverlay.addEventListener("click", (e) => {
+        if (e.target === searchModalOverlay) closeModal();
+      });
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+      const sModal = document.getElementById("searchModalOverlay");
+      if (sModal && sModal.classList.contains("active")) return;
+      const isCmdK = (e.metaKey || e.ctrlKey) && (e.code === "KeyK" || (e.key && e.key.toLowerCase() === "k"));
+      if (isCmdK) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (searchModalOverlay && searchModalOverlay.classList.contains("active")) {
+          closeModal();
+        } else {
+          openModal();
+        }
+        return;
+      }
+
+      if (e.key === "/" && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+        e.preventDefault();
+        openModal();
+        return;
+      }
+
+      if (searchModalOverlay && searchModalOverlay.classList.contains("active")) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          closeModal();
+        } else if (e.key === "ArrowDown") {
+          e.preventDefault();
+          if (filteredModalRepos.length > 0) {
+            selectedModalIndex = (selectedModalIndex + 1) % filteredModalRepos.length;
+            renderModalResults();
+          }
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          if (filteredModalRepos.length > 0) {
+            selectedModalIndex = (selectedModalIndex - 1 + filteredModalRepos.length) % filteredModalRepos.length;
+            renderModalResults();
+          }
+        } else if (e.key === "Enter") {
+          if (filteredModalRepos.length > 0 && filteredModalRepos[selectedModalIndex]) {
+            e.preventDefault();
+            const targetUrl = getProjectTargetUrl(filteredModalRepos[selectedModalIndex]);
+            closeModal();
+            window.open(targetUrl, "_blank");
+          }
+        }
+      }
+    });
+
+    if (modalSearchInput) {
+      modalSearchInput.addEventListener("input", () => {
+        selectedModalIndex = 0;
+        renderModalResults();
+      });
+    }
+
+    modalFilterBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        modalFilterBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeModalFilter = btn.dataset.filter;
+        selectedModalIndex = 0;
+        renderModalResults();
+      });
+    });
+
+    if (modalResultsList) {
+      modalResultsList.addEventListener("click", (e) => {
+        const item = e.target.closest(".modal-item");
+        if (item) {
+          closeModal();
+        }
+      });
+    }
+
+    async function syncGitHubRepos() {
+      try {
+        const res = await fetch("https://api.github.com/users/bhubbard/repos?per_page=100&sort=updated");
+        if (res.ok) {
+          const liveRepos = await res.json();
+          if (Array.isArray(liveRepos) && liveRepos.length > 0) {
+            liveRepos.forEach(live => {
+              const lower = (live.name || "").toLowerCase();
+              const match = REPOSITORIES.find(r => (r.name || "").toLowerCase() === lower);
+              if (match) {
+                match.stars = live.stargazers_count || match.stars;
+                if (live.has_pages && !GITHUB_PAGES_MAP[lower]) {
+                  GITHUB_PAGES_MAP[lower] = "https://code.brandonhubbard.com/" + live.name + "/";
+                }
+              }
+            });
+            renderModalResults();
+          }
+        }
+      } catch (e) {
+        // Retain offline catalog
+      }
+    }
+
+    renderModalResults();
+    syncGitHubRepos();
+
+  </script>
 </body>
 </html>
