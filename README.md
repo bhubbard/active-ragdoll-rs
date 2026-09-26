@@ -3,8 +3,11 @@
 [![Rust](https://img.shields.io/badge/rust-2024%20edition-orange.svg)](https://www.rust-lang.org)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
 [![Physics](https://img.shields.io/badge/physics-Rapier3D-red.svg)](https://rapier.rs)
+[![Website](https://img.shields.io/badge/demo-live%20simulation-emerald.svg)](https://code.brandonhubbard.com/active-ragdoll-rs/)
 
 > A high-performance, idiomatically engineered pure Rust port of [ashleve/ActiveRagdoll](https://github.com/ashleve/ActiveRagdoll) (Unity Humanoid Active Ragdoll).
+>
+> 🌐 **Live Interactive Web Simulation**: [code.brandonhubbard.com/active-ragdoll-rs](https://code.brandonhubbard.com/active-ragdoll-rs/)
 
 Active ragdolls combine kinematic animations with real-time physical forces. Rather than playing canned ragdoll animations upon death, active ragdolls continuously use **Proportional-Derivative (PD) controllers and joint torque drives** to track animated target poses. When characters collide with obstacles or get struck by projectiles, they stumble, lose muscle strength, stagger, recover balance, or completely collapse when knocked out.
 
