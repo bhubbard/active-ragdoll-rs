@@ -1,0 +1,32 @@
+[package]
+name = "active-ragdoll-rs"
+version = "0.1.0"
+edition = "2024"
+authors = ["Brandon Hubbard <bhubbard@users.noreply.github.com>"]
+description = "A high-performance Rust port of Unity.Humanoid.ActiveRagdoll - physical animation and active ragdoll controller"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/bhubbard/active-ragdoll-rs"
+keywords = ["ragdoll", "active-ragdoll", "physics", "animation", "game-dev"]
+categories = ["game-development", "physics", "simulation"]
+
+[dependencies]
+bitflags = { version = "2.13.2", default-features = false }
+glam = { version = "0.33.10", default-features = true }
+thiserror = "2.0.21"
+serde = { version = "1.0.229", features = ["derive"], optional = true }
+rapier3d = { version = "0.36.0", optional = true }
+
+[features]
+default = ["rapier3d"]
+rapier3d = ["dep:rapier3d"]
+serde = ["dep:serde", "glam/serde", "bitflags/serde"]
+
+[[example]]
+name = "headless_simulation"
+path = "examples/headless_simulation.rs"
+
+[[example]]
+name = "rapier_ragdoll"
+path = "examples/rapier_ragdoll.rs"
+required-features = ["rapier3d"]
