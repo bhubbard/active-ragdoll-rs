@@ -395,7 +395,7 @@ impl StandardHumanoidRig {
     }
 }
 
-/// High-level active ragdoll coordinator combining [`SlaveController`], [`AnimationFollower`], and [`CollisionDetector`].
+/// High-level active ragdoll coordinator combining [`SlaveController`], [`AnimationFollower`], [`MasterController`], and [`CollisionDetector`].
 ///
 /// Port and modern Rust equivalent of Unity's `HumanoidSetUp.cs`.
 #[derive(Debug, Clone, PartialEq)]
@@ -409,20 +409,35 @@ pub struct HumanoidSetUp {
 
     /// Collision detector and layer filter.
     pub collision_detector: CollisionDetector,
+
+    /// Kinematic 3rd-person master controller.
+    pub master: crate::master::MasterController,
+
+    /// Optional 3rd-person observation camera.
+    pub camera: Option<crate::camera::FlyCamera>,
 }
 
 impl HumanoidSetUp {
-    /// Create a new humanoid setup from follower, controller, and layer mask.
+    /// Create a new humanoid setup from follower, controller, master, and layer mask.
     pub fn new(
         follower: AnimationFollower,
         controller: SlaveController,
+        master: crate::master::MasterController,
         dont_loose_strength_mask: LayerMask,
     ) -> Self {
         Self {
             follower,
             controller,
             collision_detector: CollisionDetector::new(dont_loose_strength_mask),
+            master,
+            camera: None,
         }
+    }
+
+    /// Attach an observation camera.
+    pub fn with_camera(mut self, camera: crate::camera::FlyCamera) -> Self {
+        self.camera = Some(camera);
+        self
     }
 
     /// Number of limbs registered in this humanoid ragdoll.
@@ -508,6 +523,36 @@ impl HumanoidSetUp {
         self.controller.reset_forces();
     }
 
+    /// Full coordinated physics step: advances master locomotion, generates animated skeleton
+    /// transforms, evaluates push-back constraint, steps muscle strength state machine, and
+    /// calculates PD forces and joint drives for all limbs.
+    pub fn step_character(
+        &mut self,
+        input: &crate::master::LocomotionInput,
+        is_grounded: bool,
+        slave_states: &[SlaveLimbPhysicsState],
+        dt: f32,
+    ) -> Result<Vec<LimbDriveOutput>> {
+        if slave_states.len() != self.limb_count() {
+            return Err(ActiveRagdollError::HierarchyMismatch {
+                master_count: self.limb_count(),
+                slave_count: slave_states.len(),
+            });
+        }
+
+        let slave_hips_pos = slave_states[0].world_center_of_mass;
+        let cam_yaw = self.camera.as_ref().map(|c| c.yaw_deg).unwrap_or(0.0);
+        self.master.step(input, cam_yaw, slave_hips_pos, is_grounded, dt);
+        let master_pose = self.master.generate_master_poses();
+
+        self.update(
+            &master_pose.world_transforms,
+            &master_pose.local_rotations,
+            slave_states,
+            dt,
+        )
+    }
+
     /// Set individual limb profile by index.
     pub fn set_limb_profile(&mut self, index: usize, profile: LimbProfile) -> Result<()> {
         if index >= self.follower.limbs.len() {
@@ -523,6 +568,9 @@ impl HumanoidSetUp {
 pub struct HumanoidActiveRagdollBuilder {
     pub follower_config: AnimationFollowerConfig,
     pub controller_config: SlaveControllerConfig,
+    pub master_config: crate::master::MasterControllerConfig,
+    pub master_initial_pos: Vec3,
+    pub master_initial_yaw: f32,
     pub dont_loose_strength_mask: LayerMask,
     pub limbs: Vec<ActiveLimb>,
 }
@@ -539,6 +587,21 @@ impl HumanoidActiveRagdollBuilder {
 
     pub fn with_controller_config(mut self, config: SlaveControllerConfig) -> Self {
         self.controller_config = config;
+        self
+    }
+
+    pub fn with_master_config(mut self, config: crate::master::MasterControllerConfig) -> Self {
+        self.master_config = config;
+        self
+    }
+
+    pub fn with_master_initial_position(mut self, pos: Vec3) -> Self {
+        self.master_initial_pos = pos;
+        self
+    }
+
+    pub fn with_master_initial_yaw(mut self, yaw_deg: f32) -> Self {
+        self.master_initial_yaw = yaw_deg;
         self
     }
 
@@ -561,6 +624,9 @@ impl HumanoidActiveRagdollBuilder {
         Self {
             follower_config: follower.config,
             controller_config: SlaveControllerConfig::default(),
+            master_config: crate::master::MasterControllerConfig::default(),
+            master_initial_pos: Vec3::new(0.0, 0.95, 0.0),
+            master_initial_yaw: 0.0,
             dont_loose_strength_mask: LayerMask::default(),
             limbs: follower.limbs,
         }
@@ -592,10 +658,16 @@ impl HumanoidActiveRagdollBuilder {
 
         let follower = AnimationFollower::new(self.follower_config, self.limbs);
         let controller = SlaveController::new(self.controller_config);
+        let master = crate::master::MasterController::new(
+            self.master_config,
+            self.master_initial_pos,
+            self.master_initial_yaw,
+        );
 
         Ok(HumanoidSetUp::new(
             follower,
             controller,
+            master,
             self.dont_loose_strength_mask,
         ))
     }

@@ -57,6 +57,12 @@ pub struct AnimationFollowerConfig {
     ///
     /// Default: `true`.
     pub use_gravity: bool,
+
+    /// Whether rotational joint limits are enforced (Limited vs Free).
+    ///
+    /// Corresponds to `EnableJointLimits(bool)` in Unity `AnimationFollowing.cs`.
+    /// Default: `true`.
+    pub joint_limits_enabled: bool,
 }
 
 impl Default for AnimationFollowerConfig {
@@ -71,6 +77,7 @@ impl Default for AnimationFollowerConfig {
             angular_drag: 0.0,
             max_angular_velocity: 1000.0,
             use_gravity: true,
+            joint_limits_enabled: true,
         }
     }
 }
@@ -158,6 +165,9 @@ pub struct LimbDriveOutput {
 
     /// Direct angular torque vector in world space (for engines without native joint drives).
     pub angular_torque: Vec3,
+
+    /// Whether rotational joint limits should be enforced (Limited vs Free).
+    pub joint_limits_enabled: bool,
 }
 
 /// Computes PD forces and joint drives for all limbs to track master animation.
@@ -184,6 +194,12 @@ impl AnimationFollower {
         for limb in &mut self.limbs {
             limb.pd.reset();
         }
+    }
+
+    /// Toggle rotational joint limits (Unity `EnableJointLimits`).
+    #[inline]
+    pub fn enable_joint_limits(&mut self, enabled: bool) {
+        self.config.joint_limits_enabled = enabled;
     }
 
     /// Calculate active ragdoll drive outputs for all limbs.
@@ -234,6 +250,7 @@ impl AnimationFollower {
                     joint_spring: 0.0,
                     joint_damper: 0.0,
                     angular_torque: Vec3::ZERO,
+                    joint_limits_enabled: self.config.joint_limits_enabled,
                 });
                 continue;
             }
@@ -291,6 +308,7 @@ impl AnimationFollower {
                 joint_spring: spring,
                 joint_damper: damper,
                 angular_torque,
+                joint_limits_enabled: self.config.joint_limits_enabled,
             });
         }
 

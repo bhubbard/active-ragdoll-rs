@@ -59,7 +59,9 @@ pub mod collision;
 pub mod controller;
 pub mod error;
 pub mod follower;
+pub mod fps;
 pub mod humanoid;
+pub mod joint;
 pub mod master;
 pub mod math;
 pub mod pd;
@@ -79,9 +81,13 @@ pub mod prelude {
         ActiveLimb, AnimationFollower, AnimationFollowerConfig, LimbDriveOutput,
         SlaveLimbPhysicsState,
     };
+    pub use crate::fps::FpsDisplay;
     pub use crate::humanoid::{
         HumanoidActiveRagdollBuilder, HumanoidBoneDef, HumanoidSetUp, JointLimits, LimbCollider,
         StandardHumanoidRig,
+    };
+    pub use crate::joint::{
+        ConfigurableJointDescriptor, JointFollowAnimRot, JointMotionMode, RotationDriveMode,
     };
     pub use crate::master::{
         CharacterState, LocomotionInput, MasterController, MasterControllerConfig,

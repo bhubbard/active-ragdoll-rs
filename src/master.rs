@@ -42,6 +42,10 @@ pub struct MasterControllerConfig {
     pub push_back_speed: f32,
     /// Maximum allowed distance between master and slave roots before strong pushback (default 2.0).
     pub max_possible_distance_from_ragdoll: f32,
+    /// Determines how high will character float above ground (default 0.1).
+    pub ground_distance: f32,
+    /// Layer mask containing layers considered ground (default ENVIRONMENT).
+    pub ground_mask: crate::collision::LayerMask,
 }
 
 impl Default for MasterControllerConfig {
@@ -53,6 +57,8 @@ impl Default for MasterControllerConfig {
             turn_smooth_time: 0.35,
             push_back_speed: 7.0,
             max_possible_distance_from_ragdoll: 2.0,
+            ground_distance: 0.1,
+            ground_mask: crate::collision::LayerMask::ENVIRONMENT,
         }
     }
 }
@@ -244,6 +250,28 @@ impl MasterController {
             position: self.position,
             rotation: Quat::from_rotation_y(self.rotation_y_deg.to_radians()),
         }
+    }
+
+    /// Returns the integer animation condition code matching Unity `anim.SetInteger("Cond", ...)`.
+    ///
+    /// - `0`: Idle
+    /// - `1`: Walking
+    /// - `2`: Running
+    /// - `3`: Falling
+    #[inline]
+    pub fn anim_cond(&self) -> i32 {
+        match self.state {
+            CharacterState::Idle => 0,
+            CharacterState::Walking => 1,
+            CharacterState::Running => 2,
+            CharacterState::Falling => 3,
+        }
+    }
+
+    /// Checks if master is grounded via sphere check at feet level (Unity `Physics.CheckSphere`).
+    #[inline]
+    pub fn check_sphere_grounded(&self, ground_surface_y: f32) -> bool {
+        self.position.y <= ground_surface_y + self.config.ground_distance
     }
 
     /// Procedurally synthesizes master animation poses for the standard 11 humanoid bones.
