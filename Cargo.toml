@@ -2,6 +2,7 @@
 name = "active-ragdoll-rs"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.85"
 authors = ["Brandon Hubbard <bhubbard@users.noreply.github.com>"]
 description = "A high-performance Rust port of Unity.Humanoid.ActiveRagdoll - physical animation and active ragdoll controller"
 license = "MIT OR Apache-2.0"
@@ -9,6 +10,14 @@ readme = "README.md"
 repository = "https://github.com/bhubbard/active-ragdoll-rs"
 keywords = ["ragdoll", "active-ragdoll", "physics", "animation", "game-dev"]
 categories = ["game-development", "physics", "simulation"]
+
+[lib]
+name = "active_ragdoll_rs"
+path = "src/lib.rs"
+
+[[bin]]
+name = "active-ragdoll"
+path = "src/main.rs"
 
 [dependencies]
 bitflags = { version = "2.13.2", default-features = false }

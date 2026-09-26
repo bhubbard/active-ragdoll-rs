@@ -1,0 +1,39 @@
+{
+  "name": "active-ragdoll-rs",
+  "version": "0.1.0",
+  "description": "High-performance Rust port of Unity.Humanoid.ActiveRagdoll - physical animation and active ragdoll controller",
+  "main": "bin/active-ragdoll.js",
+  "bin": {
+    "active-ragdoll": "bin/active-ragdoll.js",
+    "active-ragdoll-rs": "bin/active-ragdoll.js"
+  },
+  "files": [
+    "bin/",
+    "README.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE"
+  ],
+  "scripts": {
+    "prepublishOnly": "cargo build --release --bin active-ragdoll && strip -x target/release/active-ragdoll && cp target/release/active-ragdoll bin/active-ragdoll-bin",
+    "test": "node bin/active-ragdoll.js --version"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhubbard/active-ragdoll-rs.git"
+  },
+  "keywords": [
+    "ragdoll",
+    "active-ragdoll",
+    "physics",
+    "animation",
+    "game-dev",
+    "simulation",
+    "cli"
+  ],
+  "author": "Brandon Hubbard",
+  "license": "MIT OR Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/bhubbard/active-ragdoll-rs/issues"
+  },
+  "homepage": "https://code.brandonhubbard.com/active-ragdoll-rs/"
+}

@@ -3,10 +3,12 @@ use glam::Vec3;
 
 #[test]
 fn test_fly_camera_look_and_pitch_clamping() {
-    let mut cam = FlyCamera::default();
-    cam.yaw_deg = 0.0;
-    cam.pitch_deg = 0.0;
-    cam.sensitivity = 1.0;
+    let mut cam = FlyCamera {
+        yaw_deg: 0.0,
+        pitch_deg: 0.0,
+        sensitivity: 1.0,
+        ..Default::default()
+    };
 
     // Rotate mouse
     cam.rotate(10.0, 5.0);
@@ -23,9 +25,11 @@ fn test_fly_camera_look_and_pitch_clamping() {
 
 #[test]
 fn test_fly_camera_basis_vectors() {
-    let mut cam = FlyCamera::default();
-    cam.yaw_deg = 0.0;
-    cam.pitch_deg = 0.0;
+    let cam = FlyCamera {
+        yaw_deg: 0.0,
+        pitch_deg: 0.0,
+        ..Default::default()
+    };
 
     let fwd = cam.forward();
     let right = cam.right();
