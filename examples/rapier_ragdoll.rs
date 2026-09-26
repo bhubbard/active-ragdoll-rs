@@ -18,8 +18,10 @@ fn main() -> Result<()> {
     let mut narrow_phase = NarrowPhase::new();
     let mut ccd_solver = CCDSolver::new();
     let mut physics_pipeline = PhysicsPipeline::new();
-    let mut integration_parameters = IntegrationParameters::default();
-    integration_parameters.dt = 0.02; // 50 Hz physics
+    let integration_parameters = IntegrationParameters {
+        dt: 0.02, // 50 Hz physics
+        ..Default::default()
+    };
 
     let gravity = Vec3::new(0.0, -9.81, 0.0);
 

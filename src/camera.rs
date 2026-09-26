@@ -104,9 +104,11 @@ mod tests {
 
     #[test]
     fn test_camera_rotation() {
-        let mut cam = FlyCamera::default();
-        cam.yaw_deg = 0.0;
-        cam.pitch_deg = 0.0;
+        let mut cam = FlyCamera {
+            yaw_deg: 0.0,
+            pitch_deg: 0.0,
+            ..Default::default()
+        };
 
         let fwd = cam.forward();
         assert!((fwd - Vec3::Z).length() < 1e-4);

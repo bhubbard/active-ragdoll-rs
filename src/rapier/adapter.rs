@@ -136,11 +136,9 @@ impl RapierRagdollAdapter {
                 body.apply_torque_impulse(torque_impulse, true);
             }
 
-            // If joints set is provided and this limb has a joint, update joint parameters
+            // If joints set is provided and this limb has a joint, wake up and prepare joint
             if let (Some(joints_set), Some(joint_handle)) = (&mut joints, binding.joint) {
-                if let Some(joint) = joints_set.get_mut(joint_handle, true) {
-                    let _ = joint; // Joint accessible for motor updates
-                }
+                let _ = joints_set.get_mut(joint_handle, true);
             }
         }
 
