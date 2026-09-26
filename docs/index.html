@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary Meta Tags -->
+  <title>active-ragdoll-rs — High-Performance Pure Rust Active Ragdoll &amp; Physical Animation</title>
+  <meta name="title" content="active-ragdoll-rs — High-Performance Pure Rust Active Ragdoll &amp; Physical Animation">
+  <meta name="description" content="A high-performance pure Rust port of Unity Humanoid Active Ragdoll with PD controllers, push-back spring constraints, muscle strength attenuation, and Rapier3D integration.">
+  <meta name="keywords" content="active ragdoll, rust physics, rapier3d, physical animation, humanoid ragdoll, pd controller, game development rust, robotics ragdoll, procedural animation">
+  <meta name="author" content="Brandon Hubbard">
+  <meta name="theme-color" content="#090b0e">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://bhubbard.github.io/active-ragdoll-rs/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bhubbard.github.io/active-ragdoll-rs/">
+  <meta property="og:site_name" content="active-ragdoll-rs">
+  <meta property="og:title" content="active-ragdoll-rs — High-Performance Pure Rust Active Ragdoll">
+  <meta property="og:description" content="Blend kinematic animation with real-time physical forces in pure Rust. Features PD controllers, dynamic muscle strength attenuation, and Rapier3D integration.">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://bhubbard.github.io/active-ragdoll-rs/">
+  <meta name="twitter:title" content="active-ragdoll-rs — High-Performance Pure Rust Active Ragdoll">
+  <meta name="twitter:description" content="Blend kinematic animation with real-time physical forces in pure Rust. Features PD controllers, dynamic muscle strength attenuation, and Rapier3D integration.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+            },
+            dark: {
+              base: '#090b0e',
+              card: '#12161f',
+              cardHover: '#181e2b',
+              border: '#232b3b',
+              subtle: '#2d3748',
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #090b0e;
+      color: #e2e8f0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .grid-bg {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 40px -10px rgba(16, 185, 129, 0.25);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 40px -10px rgba(6, 182, 212, 0.25);
+    }
+    canvas {
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body class="min-h-screen selection:bg-brand-500 selection:text-white">
+
+  <!-- Background Gradients -->
+  <div class="fixed inset-0 grid-bg pointer-events-none z-0"></div>
+  <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-brand-500/10 via-cyan-500/5 to-transparent blur-3xl pointer-events-none z-0"></div>
+
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-dark-base/80 border-b border-dark-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-brand-500 to-cyan-400 flex items-center justify-center font-bold text-dark-base text-lg shadow-md shadow-brand-500/20">
+          AR
+        </div>
+        <div>
+          <span class="font-bold text-lg tracking-tight text-white">active-ragdoll-rs</span>
+          <span class="ml-2 text-xs px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-400 border border-brand-500/20 font-mono">v0.1.0</span>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+        <a href="#playground" class="hover:text-white transition-colors">Interactive Demo</a>
+        <a href="#features" class="hover:text-white transition-colors">Features</a>
+        <a href="#architecture" class="hover:text-white transition-colors">Architecture</a>
+        <a href="#code" class="hover:text-white transition-colors">Code Examples</a>
+        <a href="#matrix" class="hover:text-white transition-colors">Port Matrix</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <a href="https://github.com/bhubbard/active-ragdoll-rs" target="_blank" rel="noopener noreferrer" 
+           class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-dark-card border border-dark-border hover:border-slate-600 text-sm font-medium text-white transition-all hover:bg-dark-cardHover">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+          </svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24">
+    <div class="text-center max-w-3xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold mb-6">
+        <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
+        Pure Rust Port of ashleve/ActiveRagdoll
+      </div>
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight sm:leading-tight">
+        Physical Animation &amp; <br/>
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-brand-400 via-cyan-400 to-blue-500">
+          Active Ragdoll Dynamics
+        </span>
+      </h1>
+      <p class="mt-6 text-lg text-slate-400 leading-relaxed">
+        Blend kinematic humanoid animation with real-time physics in Rust. Powered by 3D Proportional-Derivative (PD) controllers, push-back spring constraints, dynamic muscle strength attenuation, and Rapier3D integration.
+      </p>
+
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <a href="#playground" class="px-6 py-3 rounded-lg bg-gradient-to-r from-brand-500 to-cyan-500 text-dark-base font-bold shadow-lg shadow-brand-500/20 hover:opacity-95 transition-opacity">
+          Launch Live Simulation
+        </a>
+        <a href="#code" class="px-6 py-3 rounded-lg bg-dark-card border border-dark-border hover:border-slate-600 text-white font-semibold transition-colors">
+          View Rust Code
+        </a>
+      </div>
+
+      <!-- Quick Metrics -->
+      <div class="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl mx-auto">
+        <div class="p-4 rounded-xl bg-dark-card border border-dark-border">
+          <div class="text-2xl font-bold font-mono text-brand-400">11 Bones</div>
+          <div class="text-xs text-slate-400 mt-1">Humanoid Rig Anatomy</div>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-card border border-dark-border">
+          <div class="text-2xl font-bold font-mono text-cyan-400">50 - 60 Hz</div>
+          <div class="text-xs text-slate-400 mt-1">Real-Time Physics Loop</div>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-card border border-dark-border">
+          <div class="text-2xl font-bold font-mono text-blue-400">0 Alloc</div>
+          <div class="text-xs text-slate-400 mt-1">In Simulation Hot Path</div>
+        </div>
+        <div class="p-4 rounded-xl bg-dark-card border border-dark-border">
+          <div class="text-2xl font-bold font-mono text-emerald-400">100% Rust</div>
+          <div class="text-xs text-slate-400 mt-1">Zero C++ Prerequisites</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Canvas Playground -->
+    <section id="playground" class="mt-20 scroll-mt-24">
+      <div class="rounded-2xl bg-dark-card border border-dark-border overflow-hidden shadow-2xl glow-emerald">
+        <!-- Canvas Toolbar -->
+        <div class="px-6 py-4 border-b border-dark-border flex flex-wrap items-center justify-between gap-4 bg-dark-base/50">
+          <div class="flex items-center gap-3">
+            <span class="w-3 h-3 rounded-full bg-brand-400 animate-ping"></span>
+            <span class="font-bold text-white text-sm">Interactive Active Ragdoll Canvas</span>
+            <span class="text-xs text-slate-400">(Drag limbs with mouse or shoot balls to perturb balance)</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btn-shoot" class="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all">
+              <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
+              Shoot Ball (Impact)
+            </button>
+            <button id="btn-die" class="px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 text-xs font-semibold transition-all">
+              Knockout (Die)
+            </button>
+            <button id="btn-revive" class="px-3 py-1.5 rounded-lg bg-brand-500/20 text-brand-400 border border-brand-500/30 hover:bg-brand-500/30 text-xs font-semibold transition-all">
+              Revive (Come Alive)
+            </button>
+            <button id="btn-reset" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 text-xs font-medium transition-all">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4">
+          <!-- Canvas Viewport -->
+          <div class="lg:col-span-3 relative h-[520px] bg-slate-950 flex items-center justify-center overflow-hidden">
+            <canvas id="simCanvas" width="900" height="520" class="w-full h-full cursor-crosshair"></canvas>
+
+            <!-- HUD Overlay -->
+            <div class="absolute top-4 left-4 bg-dark-base/80 backdrop-blur-md border border-dark-border rounded-xl p-3 text-xs space-y-2 pointer-events-none">
+              <div class="flex items-center justify-between gap-4">
+                <span class="text-slate-400">Ragdoll State:</span>
+                <span id="hud-state" class="font-mono font-bold text-brand-400">FollowingAnimation</span>
+              </div>
+              <div class="flex items-center justify-between gap-4">
+                <span class="text-slate-400">Master Locomotion:</span>
+                <span id="hud-master" class="font-mono text-cyan-400">Walking</span>
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-[11px]">
+                  <span class="text-slate-400">Muscle Strength:</span>
+                  <span id="hud-strength-text" class="font-mono font-bold text-brand-400">100%</span>
+                </div>
+                <div class="w-36 h-2 rounded-full bg-slate-800 overflow-hidden">
+                  <div id="hud-strength-bar" class="h-full bg-brand-400 rounded-full transition-all duration-75" style="width: 100%;"></div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between gap-4">
+                <span class="text-slate-400">Active Contacts:</span>
+                <span id="hud-contacts" class="font-mono text-white">0</span>
+              </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="absolute bottom-4 right-4 bg-dark-base/80 backdrop-blur-md border border-dark-border rounded-lg px-3 py-1.5 text-[11px] text-slate-400 flex items-center gap-4 pointer-events-none">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Slave (Physical Ragdoll)</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-slate-500 border border-emerald-400/50"></span> Master (Kinematic Target)</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-400"></span> Projectile</span>
+            </div>
+          </div>
+
+          <!-- Controls Sidebar -->
+          <div class="p-6 bg-dark-card/90 border-t lg:border-t-0 lg:border-l border-dark-border space-y-5 text-sm">
+            <h3 class="font-bold text-white text-base border-b border-dark-border pb-2">Physics Tuning</h3>
+
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs">
+                <label for="sl-pforce" class="text-slate-300">P Force (Tracking Gain):</label>
+                <span id="val-pforce" class="font-mono text-brand-400">8.0</span>
+              </div>
+              <input id="sl-pforce" type="range" min="1" max="25" step="0.5" value="8" class="w-full accent-brand-500 bg-slate-800 rounded-lg">
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs">
+                <label for="sl-dforce" class="text-slate-300">D Force (Damping):</label>
+                <span id="val-dforce" class="font-mono text-brand-400">0.02</span>
+              </div>
+              <input id="sl-dforce" type="range" min="0.001" max="0.08" step="0.005" value="0.02" class="w-full accent-brand-500 bg-slate-800 rounded-lg">
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs">
+                <label for="sl-torque" class="text-slate-300">Joint Spring Torque:</label>
+                <span id="val-torque" class="font-mono text-brand-400">2000</span>
+              </div>
+              <input id="sl-torque" type="range" min="200" max="5000" step="100" value="2000" class="w-full accent-brand-500 bg-slate-800 rounded-lg">
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs">
+                <label for="sl-weaken" class="text-slate-300">Loose Strength Rate:</label>
+                <span id="val-weaken" class="font-mono text-brand-400">1.5 /s</span>
+              </div>
+              <input id="sl-weaken" type="range" min="0.2" max="4.0" step="0.2" value="1.5" class="w-full accent-brand-500 bg-slate-800 rounded-lg">
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs">
+                <label for="sl-walk" class="text-slate-300">Walk Cadence (Speed):</label>
+                <span id="val-walk" class="font-mono text-brand-400">1.0x</span>
+              </div>
+              <input id="sl-walk" type="range" min="0.2" max="2.5" step="0.1" value="1.0" class="w-full accent-brand-500 bg-slate-800 rounded-lg">
+            </div>
+
+            <div class="pt-4 border-t border-dark-border text-xs text-slate-400 leading-relaxed">
+              <strong class="text-white">How it works:</strong> The kinematic skeleton paces back and forth. The slave ragdoll's limbs are pulled towards the master using linear PD force signals and angular spring motors. When impacted by a projectile, muscle strength degrades, causing stumbling before restoring upright balance!
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Architecture Features -->
+    <section id="features" class="mt-28 scroll-mt-24">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <h2 class="text-3xl font-extrabold text-white">Engineered for Physical Realism</h2>
+        <p class="mt-3 text-slate-400 text-sm">Key architectural components ported faithfully and optimized in Rust.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Card 1 -->
+        <div class="p-6 rounded-2xl bg-dark-card border border-dark-border hover:border-slate-700 transition-all hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center mb-5 text-xl font-bold font-mono">
+            PD
+          </div>
+          <h3 class="text-lg font-bold text-white">Physical Animation Following</h3>
+          <p class="mt-2 text-slate-400 text-sm leading-relaxed">
+            Target world Center of Mass (COM) for each limb is computed using local offsets. PD error signals generate VelocityChange impulses, combined with quaternion orientation joint drives.
+          </p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="p-6 rounded-2xl bg-dark-card border border-dark-border hover:border-slate-700 transition-all hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mb-5 text-xl font-bold font-mono">
+            PB
+          </div>
+          <h3 class="text-lg font-bold text-white">Push-Back Constraint</h3>
+          <p class="mt-2 text-slate-400 text-sm leading-relaxed">
+            Prevents master from running away when the ragdoll gets caught or pinned against an obstacle. Applies a SmoothStep dampening force pushing the kinematic master back towards the ragdoll.
+          </p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="p-6 rounded-2xl bg-dark-card border border-dark-border hover:border-slate-700 transition-all hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mb-5 text-xl font-bold font-mono">
+            LM
+          </div>
+          <h3 class="text-lg font-bold text-white">Strength &amp; Contact Filtering</h3>
+          <p class="mt-2 text-slate-400 text-sm leading-relaxed">
+            Tracks limb collisions using 32-bit LayerMasks. Contact smoothly attenuates muscle strength to induce wobbles, while clearance recovers balance. Includes complete knockout (<code class="text-xs font-mono text-cyan-300">die()</code>) and revival.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture Diagram -->
+    <section id="architecture" class="mt-28 scroll-mt-24">
+      <div class="p-8 rounded-2xl bg-dark-card border border-dark-border">
+        <h2 class="text-2xl font-bold text-white mb-2">Master-Slave Feedback Loop</h2>
+        <p class="text-slate-400 text-sm mb-8">Data flow between Kinematic Master, Active PD Follower, and Physics Ragdoll:</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+          <div class="p-5 rounded-xl bg-dark-base border border-dark-border">
+            <span class="text-xs uppercase tracking-wider font-semibold text-brand-400">1. Input &amp; Kinematics</span>
+            <h4 class="font-bold text-white mt-1">MasterController</h4>
+            <p class="text-xs text-slate-400 mt-2">SmoothDamp turning, walking/running gait cadence, procedural FK skeleton poses.</p>
+          </div>
+
+          <div class="p-5 rounded-xl bg-dark-base border border-dark-border">
+            <span class="text-xs uppercase tracking-wider font-semibold text-cyan-400">2. Control Drive</span>
+            <h4 class="font-bold text-white mt-1">AnimationFollower</h4>
+            <p class="text-xs text-slate-400 mt-2">Calculates linear COM PD impulses and quaternion angular joint motor torques.</p>
+          </div>
+
+          <div class="p-5 rounded-xl bg-dark-base border border-dark-border">
+            <span class="text-xs uppercase tracking-wider font-semibold text-blue-400">3. Physics Ragdoll</span>
+            <h4 class="font-bold text-white mt-1">11-Bone Slave</h4>
+            <p class="text-xs text-slate-400 mt-2">Rapier3D or headless rigid bodies, spherical joints, collider contacts, gravity.</p>
+          </div>
+
+          <div class="p-5 rounded-xl bg-dark-base border border-dark-border">
+            <span class="text-xs uppercase tracking-wider font-semibold text-purple-400">4. Pushback Feedback</span>
+            <h4 class="font-bold text-white mt-1">Push-Back Spring</h4>
+            <p class="text-xs text-slate-400 mt-2">Restrains kinematic master distance; feeds back into next frame's motion vector.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Code Examples -->
+    <section id="code" class="mt-28 scroll-mt-24">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <h2 class="text-3xl font-extrabold text-white">Clean, Idiomatic Rust APIs</h2>
+        <p class="mt-3 text-slate-400 text-sm">Engine-agnostic core with first-class Rapier3D support.</p>
+      </div>
+
+      <div class="rounded-2xl bg-dark-card border border-dark-border overflow-hidden">
+        <!-- Tabs -->
+        <div class="flex border-b border-dark-border bg-dark-base/60 px-4 text-xs font-mono font-semibold">
+          <button class="code-tab active px-4 py-3 text-brand-400 border-b-2 border-brand-400 focus:outline-none" data-target="snippet-quickstart">
+            1. Quickstart Simulation
+          </button>
+          <button class="code-tab px-4 py-3 text-slate-400 hover:text-white border-b-2 border-transparent focus:outline-none" data-target="snippet-rapier">
+            2. Rapier3D Adapter
+          </button>
+          <button class="code-tab px-4 py-3 text-slate-400 hover:text-white border-b-2 border-transparent focus:outline-none" data-target="snippet-knockout">
+            3. Knockout &amp; Projectiles
+          </button>
+        </div>
+
+        <div class="p-6 bg-slate-950 font-mono text-xs overflow-x-auto text-slate-300">
+          <!-- Snippet 1 -->
+          <pre id="snippet-quickstart" class="code-snippet leading-relaxed"><code><span class="text-purple-400">use</span> active_ragdoll_rs::prelude::*;
+<span class="text-purple-400">use</span> glam::{Quat, Vec3};
+
+<span class="text-purple-400">fn</span> <span class="text-blue-400">main</span>() -> Result&lt;()&gt; {
+    <span class="text-slate-500">// 1. Build standard 11-bone humanoid active ragdoll</span>
+    <span class="text-purple-400">let</span> <span class="text-purple-400">mut</span> setup = HumanoidActiveRagdollBuilder::<span class="text-cyan-400">standard_humanoid_11</span>()
+        .<span class="text-cyan-400">build</span>()?;
+
+    <span class="text-purple-400">let</span> limb_count = setup.<span class="text-cyan-400">limb_count</span>(); <span class="text-slate-500">// 11 limbs</span>
+    <span class="text-purple-400">let</span> input = LocomotionInput { horizontal: <span class="text-amber-400">0.0</span>, vertical: <span class="text-amber-400">1.0</span>, run: <span class="text-amber-400">false</span> };
+    <span class="text-purple-400">let</span> dt = <span class="text-amber-400">0.02</span>; <span class="text-slate-500">// 50 Hz</span>
+
+    <span class="text-slate-500">// 2. Step character locomotion and physics follower in one call</span>
+    <span class="text-purple-400">let</span> drive_outputs = setup.<span class="text-cyan-400">step_character</span>(&input, <span class="text-amber-400">true</span>, &slave_states, dt)?;
+    
+    <span class="text-slate-500">// 3. Each output contains linear force, target joint rotation, and spring/damping</span>
+    <span class="text-purple-400">for</span> (i, output) <span class="text-purple-400">in</span> drive_outputs.<span class="text-cyan-400">into_iter</span>().<span class="text-cyan-400">enumerate</span>() {
+        println!(<span class="text-emerald-400">"Limb {}: Force = {:?}, Target Rot = {:?}"</span>, i, output.linear_force, output.target_rotation);
+    }
+    Ok(())
+}</code></pre>
+
+          <!-- Snippet 2 -->
+          <pre id="snippet-rapier" class="code-snippet leading-relaxed hidden"><code><span class="text-purple-400">use</span> active_ragdoll_rs::prelude::*;
+<span class="text-purple-400">use</span> rapier3d::prelude::*;
+
+<span class="text-purple-400">fn</span> <span class="text-blue-400">step_rapier_ragdoll</span>(
+    adapter: &<span class="text-purple-400">mut</span> RapierRagdollAdapter,
+    master: &<span class="text-purple-400">mut</span> MasterController,
+    bodies: &<span class="text-purple-400">mut</span> RigidBodySet,
+    joints: &<span class="text-purple-400">mut</span> ImpulseJointSet,
+    dt: <span class="text-cyan-400">f32</span>,
+) -> Result&lt;()&gt; {
+    <span class="text-slate-500">// Read slave hips position for push-back spring constraint</span>
+    <span class="text-purple-400">let</span> hips_pos = bodies.<span class="text-cyan-400">get</span>(adapter.bindings[<span class="text-amber-400">0</span>].body).<span class="text-cyan-400">unwrap</span>().<span class="text-cyan-400">translation</span>();
+    master.<span class="text-cyan-400">step</span>(&LocomotionInput::default(), <span class="text-amber-400">0.0</span>, hips_pos, <span class="text-amber-400">true</span>, dt);
+
+    <span class="text-purple-400">let</span> poses = master.<span class="text-cyan-400">generate_master_poses</span>();
+
+    <span class="text-slate-500">// Automatically extracts Rapier rigid body states, updates muscle strength,</span>
+    <span class="text-slate-500">// and injects linear velocity impulses and angular torque impulses into Rapier</span>
+    adapter.<span class="text-cyan-400">step</span>(&poses.world_transforms, &poses.local_rotations, bodies, Some(joints), dt)
+}</code></pre>
+
+          <!-- Snippet 3 -->
+          <pre id="snippet-knockout" class="code-snippet leading-relaxed hidden"><code><span class="text-purple-400">use</span> active_ragdoll_rs::prelude::*;
+
+<span class="text-purple-400">fn</span> <span class="text-blue-400">test_projectile_knockout</span>(setup: &<span class="text-purple-400">mut</span> HumanoidSetUp) {
+    <span class="text-slate-500">// 1. Shoot ballistic projectile (port of ShootObject.cs)</span>
+    <span class="text-purple-400">let</span> <span class="text-purple-400">mut</span> projectile = Projectile::<span class="text-cyan-400">shoot</span>(origin, forward, <span class="text-amber-400">21.0</span>, <span class="text-amber-400">0.15</span>, <span class="text-amber-400">5.0</span>);
+
+    <span class="text-slate-500">// 2. Check impact on chest</span>
+    <span class="text-purple-400">if</span> <span class="text-purple-400">let</span> Some(impulse) = projectile.<span class="text-cyan-400">check_sphere_collision</span>(chest_pos, <span class="text-amber-400">0.2</span>, <span class="text-amber-400">20.0</span>) {
+        setup.<span class="text-cyan-400">on_collision_enter</span>(LayerMask::ENVIRONMENT.<span class="text-cyan-400">bits</span>().<span class="text-cyan-400">trailing_zeros</span>() <span class="text-purple-400">as</span> <span class="text-cyan-400">u8</span>);
+    }
+
+    <span class="text-slate-500">// 3. Or trigger instant knockout (ragdoll collapses completely limp)</span>
+    setup.<span class="text-cyan-400">die</span>();
+    assert_eq!(setup.<span class="text-cyan-400">state</span>(), RagdollState::Dead);
+    assert_eq!(setup.<span class="text-cyan-400">current_strength</span>(), <span class="text-amber-400">0.0</span>);
+
+    <span class="text-slate-500">// Automatically recovers balance after dead_time (default 4.0s)</span>
+    setup.<span class="text-cyan-400">come_alive</span>();
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Port Matrix -->
+    <section id="matrix" class="mt-28 scroll-mt-24">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <h2 class="text-3xl font-extrabold text-white">Full Unity C# to Rust Port Matrix</h2>
+        <p class="mt-3 text-slate-400 text-sm">Every script and capability from ashleve/ActiveRagdoll ported and covered by unit tests.</p>
+      </div>
+
+      <div class="overflow-x-auto rounded-2xl border border-dark-border bg-dark-card shadow-lg">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-dark-base/80 border-b border-dark-border text-slate-400 font-mono uppercase tracking-wider">
+            <tr>
+              <th class="px-6 py-4">Unity C# Original</th>
+              <th class="px-6 py-4">Rust Module</th>
+              <th class="px-6 py-4">Key Capabilities</th>
+              <th class="px-6 py-4">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-dark-border/60 text-slate-300 font-mono">
+            <tr class="hover:bg-dark-cardHover/50">
+              <td class="px-6 py-3.5 font-bold text-white">AnimationFollowing.cs</td>
+              <td class="px-6 py-3.5 text-brand-400">follower.rs</td>
+              <td class="px-6 py-3.5 text-slate-400 font-sans">PD linear COM forces, quaternion joint drives, limb profiles, joint limit toggles.</td>
+              <td class="px-6 py-3.5"><span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">Verified</span></td>
+            </tr>
+            <tr class="hover:bg-dark-cardHover/50">
+              <td class="px-6 py-3.5 font-bold text-white">MasterController.cs</td>
+              <td class="px-6 py-3.5 text-brand-400">master.rs</td>
+              <td class="px-6 py-3.5 text-slate-400 font-sans">3rd-person locomotion, SmoothDamp turning, push-back constraint, forward kinematics.</td>
+              <td class="px-6 py-3.5"><span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">Verified</span></td>
+            </tr>
+            <tr class="hover:bg-dark-cardHover/50">
+              <td class="px-6 py-3.5 font-bold text-white">SlaveController.cs</td>
+              <td class="px-6 py-3.5 text-brand-400">controller.rs</td>
+              <td class="px-6 py-3.5 text-slate-400 font-sans">Strength loss on contact, recovery lerping, unconsciousness (die/come_alive).</td>
+              <td class="px-6 py-3.5"><span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">Verified</span></td>
+            </tr>
+            <tr class="hover:bg-dark-cardHover/50">
+              <td class="px-6 py-3.5 font-bold text-white">CollisionDetector.cs</td>
+              <td class="px-6 py-3.5 text-brand-400">collision.rs</td>
+              <td class="px-6 py-3.5 text-slate-400 font-sans">32-bit LayerMask filtering, underflow-safe collision enter/exit counting.</td>
+              <td class="px-6 py-3.5"><span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">Verified</span></td>
+            </tr>
+            <tr class="hover:bg-dark-cardHover/50">
+              <td class="px-6 py-3.5 font-bold text-white">HumanoidSetUp.cs</td>
+              <td class="px-6 py-3.5 text-brand-400">humanoid.rs</td>
+              <td class="px-6 py-3.5 text-slate-400 font-sans">11-bone standard rig anatomy, limits, coordinator, step_character() pipeline.</td>
+              <td class="px-6 py-3.5"><span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">Verified</span></td>
+            </tr>
+            <tr class="hover:bg-dark-cardHover/50">
+              <td class="px-6 py-3.5 font-bold text-white">ShootObject.cs</td>
+              <td class="px-6 py-3.5 text-brand-400">projectile.rs</td>
+              <td class="px-6 py-3.5 text-slate-400 font-sans">High-speed ballistic projectile launcher with gravity and momentum impulse.</td>
+              <td class="px-6 py-3.5"><span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">Verified</span></td>
+            </tr>
+            <tr class="hover:bg-dark-cardHover/50">
+              <td class="px-6 py-3.5 font-bold text-white">FlyCamera.cs</td>
+              <td class="px-6 py-3.5 text-brand-400">camera.rs</td>
+              <td class="px-6 py-3.5 text-slate-400 font-sans">6DOF orbit/fly camera controller with pitch clamping and speed multipliers.</td>
+              <td class="px-6 py-3.5"><span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">Verified</span></td>
+            </tr>
+            <tr class="hover:bg-dark-cardHover/50">
+              <td class="px-6 py-3.5 font-bold text-white">FPSDisplay.cs</td>
+              <td class="px-6 py-3.5 text-brand-400">fps.rs</td>
+              <td class="px-6 py-3.5 text-slate-400 font-sans">Exponential moving average delta time, FPS, and frame latency calculator.</td>
+              <td class="px-6 py-3.5"><span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">Verified</span></td>
+            </tr>
+            <tr class="hover:bg-dark-cardHover/50">
+              <td class="px-6 py-3.5 font-bold text-white">ReplaceJoints.cs</td>
+              <td class="px-6 py-3.5 text-brand-400">joint.rs</td>
+              <td class="px-6 py-3.5 text-slate-400 font-sans">6DOF Configurable Joint descriptors and CharacterJoint limit conversion.</td>
+              <td class="px-6 py-3.5"><span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">Verified</span></td>
+            </tr>
+            <tr class="hover:bg-dark-cardHover/50">
+              <td class="px-6 py-3.5 font-bold text-white">Unity Physics Engine</td>
+              <td class="px-6 py-3.5 text-brand-400">rapier/</td>
+              <td class="px-6 py-3.5 text-slate-400 font-sans">Direct Rapier3D rigid-body and spherical joint adapter (RapierRagdollAdapter).</td>
+              <td class="px-6 py-3.5"><span class="px-2 py-0.5 rounded bg-brand-500/10 text-brand-400 border border-brand-500/20">Verified</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-32 border-t border-dark-border bg-dark-base/90 py-12 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+      <div class="flex items-center justify-center gap-6 text-slate-400">
+        <a href="https://github.com/bhubbard/active-ragdoll-rs" class="hover:text-white transition-colors">GitHub Repository</a>
+        <a href="https://github.com/ashleve/ActiveRagdoll" class="hover:text-white transition-colors">Original Unity ActiveRagdoll</a>
+        <a href="https://rapier.rs" class="hover:text-white transition-colors">Rapier3D</a>
+      </div>
+      <p>Licensed under MIT OR Apache-2.0. Authored by Brandon Hubbard.</p>
+    </div>
+  </footer>
+
+  <!-- Simulation & Interactive Logic -->
+  <script>
+    // Tab switching
+    document.querySelectorAll('.code-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.code-tab').forEach(t => {
+          t.classList.remove('active', 'text-brand-400', 'border-brand-400');
+          t.classList.add('text-slate-400', 'border-transparent');
+        });
+        document.querySelectorAll('.code-snippet').forEach(s => s.classList.add('hidden'));
+
+        tab.classList.add('active', 'text-brand-400', 'border-brand-400');
+        tab.classList.remove('text-slate-400', 'border-transparent');
+        document.getElementById(tab.dataset.target).classList.remove('hidden');
+      });
+    });
+
+    // -------------------------------------------------------------
+    // Live Active Ragdoll Physics Simulation on Canvas
+    // -------------------------------------------------------------
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Tuning Sliders
+    const slPForce = document.getElementById('sl-pforce');
+    const slDForce = document.getElementById('sl-dforce');
+    const slTorque = document.getElementById('sl-torque');
+    const slWeaken = document.getElementById('sl-weaken');
+    const slWalk = document.getElementById('sl-walk');
+
+    const valPForce = document.getElementById('val-pforce');
+    const valDForce = document.getElementById('val-dforce');
+    const valTorque = document.getElementById('val-torque');
+    const valWeaken = document.getElementById('val-weaken');
+    const valWalk = document.getElementById('val-walk');
+
+    slPForce.oninput = () => valPForce.innerText = parseFloat(slPForce.value).toFixed(1);
+    slDForce.oninput = () => valDForce.innerText = parseFloat(slDForce.value).toFixed(3);
+    slTorque.oninput = () => valTorque.innerText = slTorque.value;
+    slWeaken.oninput = () => valWeaken.innerText = parseFloat(slWeaken.value).toFixed(1) + ' /s';
+    slWalk.oninput = () => valWalk.innerText = parseFloat(slWalk.value).toFixed(1) + 'x';
+
+    // HUD Elements
+    const hudState = document.getElementById('hud-state');
+    const hudStrengthBar = document.getElementById('hud-strength-bar');
+    const hudStrengthText = document.getElementById('hud-strength-text');
+    const hudContacts = document.getElementById('hud-contacts');
+
+    // Simulation state
+    let simTime = 0;
+    let walkPhase = 0;
+    let strength = 1.0;
+    let isAlive = true;
+    let deadTimer = 0;
+    const deadTime = 3.0;
+    let activeCollisions = 0;
+
+    // Master (Kinematic Target) Root
+    let masterX = canvas.width / 2;
+    let masterY = 320;
+    let masterSpeed = 1.2;
+
+    // Ragdoll Bones Representation
+    // 0: Hips, 1: Spine, 2: Head, 3: LeftUpperArm, 4: LeftLowerArm, 5: RightUpperArm, 6: RightLowerArm, 7: LeftUpperLeg, 8: LeftLowerLeg, 9: RightUpperLeg, 10: RightLowerLeg
+    const bones = [
+      { name: 'Hips', x: masterX, y: masterY, vx: 0, vy: 0, r: 16, mass: 14, lastErrX: 0, lastErrY: 0 },
+      { name: 'Spine', x: masterX, y: masterY - 60, vx: 0, vy: 0, r: 14, mass: 22, lastErrX: 0, lastErrY: 0 },
+      { name: 'Head', x: masterX, y: masterY - 110, vx: 0, vy: 0, r: 18, mass: 4.5, lastErrX: 0, lastErrY: 0 },
+      { name: 'LUpperArm', x: masterX - 35, y: masterY - 60, vx: 0, vy: 0, r: 8, mass: 3.5, lastErrX: 0, lastErrY: 0 },
+      { name: 'LLowerArm', x: masterX - 50, y: masterY - 20, vx: 0, vy: 0, r: 7, mass: 2.0, lastErrX: 0, lastErrY: 0 },
+      { name: 'RUpperArm', x: masterX + 35, y: masterY - 60, vx: 0, vy: 0, r: 8, mass: 3.5, lastErrX: 0, lastErrY: 0 },
+      { name: 'RLowerArm', x: masterX + 50, y: masterY - 20, vx: 0, vy: 0, r: 7, mass: 2.0, lastErrX: 0, lastErrY: 0 },
+      { name: 'LUpperLeg', x: masterX - 20, y: masterY + 50, vx: 0, vy: 0, r: 10, mass: 9.0, lastErrX: 0, lastErrY: 0 },
+      { name: 'LLowerLeg', x: masterX - 22, y: masterY + 110, vx: 0, vy: 0, r: 8, mass: 4.5, lastErrX: 0, lastErrY: 0 },
+      { name: 'RUpperLeg', x: masterX + 20, y: masterY + 50, vx: 0, vy: 0, r: 10, mass: 9.0, lastErrX: 0, lastErrY: 0 },
+      { name: 'RLowerLeg', x: masterX + 22, y: masterY + 110, vx: 0, vy: 0, r: 8, mass: 4.5, lastErrX: 0, lastErrY: 0 },
+    ];
+
+    // Projectiles
+    let projectiles = [];
+
+    // Drag interaction
+    let draggedBone = null;
+    let mouseX = 0, mouseY = 0;
+    let isMouseDown = false;
+
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+      mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+      isMouseDown = true;
+
+      // Check bone pick
+      for (let b of bones) {
+        let dx = mouseX - b.x;
+        let dy = mouseY - b.y;
+        if (dx * dx + dy * dy < (b.r + 10) * (b.r + 10)) {
+          draggedBone = b;
+          break;
+        }
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+      mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+    });
+
+    window.addEventListener('mouseup', () => {
+      isMouseDown = false;
+      draggedBone = null;
+    });
+
+    function spawnProjectile() {
+      // Fire from left or right towards chest
+      const fromLeft = Math.random() > 0.5;
+      projectiles.push({
+        x: fromLeft ? 40 : canvas.width - 40,
+        y: masterY - 60 + (Math.random() * 40 - 20),
+        vx: fromLeft ? 24 : -24,
+        vy: -2,
+        r: 16,
+        mass: 7.0,
+        active: true
+      });
+    }
+
+    document.getElementById('btn-shoot').onclick = spawnProjectile;
+    document.getElementById('btn-die').onclick = () => {
+      isAlive = false;
+      strength = 0;
+      deadTimer = 0;
+    };
+    document.getElementById('btn-revive').onclick = () => {
+      isAlive = true;
+    };
+    document.getElementById('btn-reset').onclick = () => {
+      isAlive = true;
+      strength = 1.0;
+      masterX = canvas.width / 2;
+      projectiles = [];
+      for (let b of bones) {
+        b.x = masterX;
+        b.vx = 0;
+        b.vy = 0;
+        b.lastErrX = 0;
+        b.lastErrY = 0;
+      }
+    };
+
+    // Main Simulation Loop
+    let lastTime = performance.now();
+
+    function stepSimulation() {
+      const now = performance.now();
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+      simTime += dt;
+
+      const pGain = parseFloat(slPForce.value);
+      const dGain = parseFloat(slDForce.value);
+      const jointTorque = parseFloat(slTorque.value);
+      const weakenRate = parseFloat(slWeaken.value);
+      const speedMult = parseFloat(slWalk.value);
+
+      // 1. Advance Master Locomotion (Kinematic Pacing with Pushback constraint)
+      walkPhase += dt * 4.0 * speedMult;
+      
+      // Pushback calculation (Unity SmoothStep)
+      const slaveHips = bones[0];
+      const slaveToMaster = slaveHips.x - masterX;
+      const dist = Math.abs(slaveToMaster);
+      const ratio = Math.min(dist / 140.0, 1.0);
+      const smoothDist = ratio * ratio * (3.0 - 2.0 * ratio);
+      const pushback = (slaveToMaster > 0 ? 1 : -1) * smoothDist * 40.0;
+
+      // Pacing oscillation
+      const moveStep = Math.sin(walkPhase * 0.4) * 80.0 * speedMult * dt;
+      masterX += moveStep + pushback * dt;
+      masterX = Math.max(160, Math.min(canvas.width - 160, masterX));
+
+      // Master bone target calculations (Kinematic Poses)
+      const legSwingL = Math.sin(walkPhase) * 35;
+      const legSwingR = -legSwingL;
+      const armSwingL = -legSwingL * 0.8;
+      const armSwingR = legSwingL * 0.8;
+      const breath = Math.sin(walkPhase * 2.0) * 3;
+
+      const targets = [
+        { x: masterX, y: masterY },                             // Hips
+        { x: masterX, y: masterY - 60 + breath },               // Spine
+        { x: masterX, y: masterY - 110 + breath * 1.2 },        // Head
+        { x: masterX - 35, y: masterY - 60 + armSwingL },       // LUpperArm
+        { x: masterX - 45, y: masterY - 20 + armSwingL * 1.3 }, // LLowerArm
+        { x: masterX + 35, y: masterY - 60 + armSwingR },       // RUpperArm
+        { x: masterX + 45, y: masterY - 20 + armSwingR * 1.3 }, // RLowerArm
+        { x: masterX - 20 + legSwingL, y: masterY + 50 },       // LUpperLeg
+        { x: masterX - 22 + legSwingL * 1.2, y: masterY + 110 },// LLowerLeg
+        { x: masterX + 20 + legSwingR, y: masterY + 50 },       // RUpperLeg
+        { x: masterX + 22 + legSwingR * 1.2, y: masterY + 110 } // RLowerLeg
+      ];
+
+      // 2. Muscle Strength State Machine
+      activeCollisions = 0;
+      if (!isAlive) {
+        hudState.innerText = 'Dead (Limp)';
+        hudState.className = 'font-mono font-bold text-red-400';
+        deadTimer += dt;
+        if (deadTimer >= deadTime) {
+          isAlive = true;
+          strength = 0.1;
+        }
+      } else {
+        // Check projectile collisions
+        for (let p of projectiles) {
+          if (!p.active) continue;
+          for (let b of bones) {
+            let dx = p.x - b.x;
+            let dy = p.y - b.y;
+            let minDist = p.r + b.r;
+            if (dx * dx + dy * dy < minDist * minDist) {
+              activeCollisions++;
+              // Momentum transfer
+              b.vx += (p.vx * p.mass) / b.mass;
+              b.vy += (p.vy * p.mass) / b.mass;
+              p.vx = -p.vx * 0.3;
+              p.active = false;
+            }
+          }
+        }
+
+        if (activeCollisions > 0) {
+          strength = Math.max(0.1, strength - weakenRate * dt);
+          hudState.innerText = 'LoosingStrength';
+          hudState.className = 'font-mono font-bold text-amber-400';
+        } else if (strength < 1.0) {
+          strength = Math.min(1.0, strength + 0.15 * dt);
+          hudState.innerText = 'GainingStrength';
+          hudState.className = 'font-mono font-bold text-cyan-400';
+        } else {
+          hudState.innerText = 'FollowingAnimation';
+          hudState.className = 'font-mono font-bold text-brand-400';
+        }
+      }
+
+      hudStrengthBar.style.width = (strength * 100).toFixed(0) + '%';
+      hudStrengthText.innerText = (strength * 100).toFixed(0) + '%';
+      hudContacts.innerText = activeCollisions;
+
+      // 3. Physical Ragdoll Simulation (PD Forces + Joint Springs)
+      const effectiveP = isAlive ? pGain * strength : 0.0;
+      const effectiveTorque = isAlive ? (jointTorque / 2000.0) * strength : 0.0;
+
+      for (let i = 0; i < bones.length; i++) {
+        const b = bones[i];
+        const tgt = targets[i];
+
+        if (draggedBone === b && isMouseDown) {
+          b.x = mouseX;
+          b.y = mouseY;
+          b.vx = 0;
+          b.vy = 0;
+          continue;
+        }
+
+        // PD Tracking towards Master Bone
+        const errX = tgt.x - b.x;
+        const errY = tgt.y - b.y;
+
+        const dErrX = (errX - b.lastErrX) / dt;
+        const dErrY = (errY - b.lastErrY) / dt;
+        b.lastErrX = errX;
+        b.lastErrY = errY;
+
+        const forceX = effectiveP * (errX + dGain * dErrX) * 18.0;
+        const forceY = effectiveP * (errY + dGain * dErrY) * 18.0;
+
+        // Apply Forces
+        b.vx += (forceX / b.mass) * dt;
+        b.vy += ((forceY + 350.0) / b.mass) * dt; // Add gravity
+
+        // Linear Damping
+        b.vx *= 1.0 - (0.15 * dt * 20.0);
+        b.vy *= 1.0 - (0.15 * dt * 20.0);
+
+        b.x += b.vx * dt * 20.0;
+        b.y += b.vy * dt * 20.0;
+
+        // Floor Collision at y = 460
+        if (b.y + b.r > 460) {
+          b.y = 460 - b.r;
+          b.vy = -b.vy * 0.15;
+          b.vx *= 0.8;
+        }
+      }
+
+      // Projectiles update
+      for (let p of projectiles) {
+        if (!p.active) continue;
+        p.vy += 400.0 * dt;
+        p.x += p.vx * dt * 30.0;
+        p.y += p.vy * dt * 30.0;
+        if (p.y > 450 || p.x < 0 || p.x > canvas.width) {
+          p.active = false;
+        }
+      }
+
+      // 4. Render
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Floor
+      ctx.strokeStyle = '#232b3b';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 460);
+      ctx.lineTo(canvas.width, 460);
+      ctx.stroke();
+
+      // Draw Master Wireframe (Translucent Target)
+      ctx.strokeStyle = 'rgba(74, 222, 128, 0.25)';
+      ctx.lineWidth = 3;
+      drawSkeletonLines(ctx, targets);
+
+      // Draw Slave Ragdoll Skeleton Lines
+      ctx.strokeStyle = isAlive 
+        ? `rgba(16, 185, 129, ${0.4 + strength * 0.6})`
+        : 'rgba(239, 68, 68, 0.6)';
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      drawSkeletonLines(ctx, bones);
+
+      // Draw Slave Bones (Capsules/Circles)
+      for (let i = 0; i < bones.length; i++) {
+        const b = bones[i];
+        ctx.fillStyle = i === 2 ? '#34d399' : (i === 1 ? '#10b981' : '#059669');
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // Draw Projectiles
+      for (let p of projectiles) {
+        if (!p.active) continue;
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#fca5a5';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      requestAnimationFrame(stepSimulation);
+    }
+
+    function drawSkeletonLines(c, pts) {
+      function line(i, j) {
+        c.beginPath();
+        c.moveTo(pts[i].x, pts[i].y);
+        c.lineTo(pts[j].x, pts[j].y);
+        c.stroke();
+      }
+      line(0, 1); // Hips -> Spine
+      line(1, 2); // Spine -> Head
+      line(1, 3); // Spine -> LUpperArm
+      line(3, 4); // LUpperArm -> LLowerArm
+      line(1, 5); // Spine -> RUpperArm
+      line(5, 6); // RUpperArm -> RLowerArm
+      line(0, 7); // Hips -> LUpperLeg
+      line(7, 8); // LUpperLeg -> LLowerLeg
+      line(0, 9); // Hips -> RUpperLeg
+      line(9, 10);// RUpperLeg -> RLowerLeg
+    }
+
+    requestAnimationFrame(stepSimulation);
+  </script>
+</body>
+</html>
