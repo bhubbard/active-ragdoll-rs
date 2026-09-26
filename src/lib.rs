@@ -54,6 +54,8 @@
 //! assert_eq!(drive_outputs.len(), limb_count);
 //! ```
 
+pub use glam;
+
 pub mod camera;
 pub mod collision;
 pub mod controller;
