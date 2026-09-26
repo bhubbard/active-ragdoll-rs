@@ -748,6 +748,7 @@
         <a href="#overview" class="subnav-link active">Overview</a>
         <a href="#sandbox" class="subnav-link">3D Sandbox</a>
         <a href="#architecture" class="subnav-link">Architecture</a>
+        <a href="#benchmarks" class="subnav-link">Benchmarks</a>
         <a href="#quickstart" class="subnav-link">Quickstart</a>
         <a href="https://github.com/bhubbard/active-ragdoll-rs" target="_blank" rel="noopener noreferrer" class="subnav-link github-link"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>GitHub ↗</a>
       </nav>
@@ -1035,6 +1036,46 @@
             </tr>
           </tbody>
         </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benchmarks Section -->
+  <section id="benchmarks" style="padding: 5rem 0; background: rgba(13, 17, 23, 0.7); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag" style="background: rgba(0, 212, 255, 0.12); border-color: rgba(0, 212, 255, 0.3); color: #38bdf8;">Performance Benchmarks</div>
+        <h2 class="section-title">Microsecond Active Ragdolls vs. Unity C#</h2>
+        <p class="section-desc">
+          Comparative benchmarks testing 11-bone humanoid PD tracking, state machines, and crowd capacity against Unity.Humanoid.ActiveRagdoll.
+          <a href="https://github.com/bhubbard/active-ragdoll-rs/blob/main/BENCHMARKS.md" style="color: #6366f1; font-family: var(--font-mono); font-weight: 600; text-decoration: underline; margin-left: 0.5rem;">View Full BENCHMARKS.md →</a>
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem;">
+          <div style="color: var(--text-muted); font-size: 0.75rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">Single 11-Bone Ragdoll</div>
+          <div style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 700; color: #6366f1;">0.40 µs <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 400;">/ update</span></div>
+          <div style="color: #10b981; font-size: 0.8rem; font-family: var(--font-mono); margin-top: 0.5rem;">362× faster than Unity C# (~145 µs)</div>
+        </div>
+
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem;">
+          <div style="color: var(--text-muted); font-size: 0.75rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">100-Humanoid Crowd (1,100 bones)</div>
+          <div style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 700; color: #38bdf8;">39.3 µs <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 400;">(25,446 FPS)</span></div>
+          <div style="color: #10b981; font-size: 0.8rem; font-family: var(--font-mono); margin-top: 0.5rem;">0.24% of 16.6ms 60 FPS frame budget</div>
+        </div>
+
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem;">
+          <div style="color: var(--text-muted); font-size: 0.75rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">250-Humanoid Crowd (2,750 bones)</div>
+          <div style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 700; color: #a855f7;">98.4 µs <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 400;">(10,160 FPS)</span></div>
+          <div style="color: #10b981; font-size: 0.8rem; font-family: var(--font-mono); margin-top: 0.5rem;">Unity C# drops below 30 FPS (>36 ms)</div>
+        </div>
+
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem;">
+          <div style="color: var(--text-muted); font-size: 0.75rem; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;">PD Follower Joint Solver</div>
+          <div style="font-family: var(--font-heading); font-size: 2.2rem; font-weight: 700; color: #10b981;">1.09 ns <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 400;">/ solve</span></div>
+          <div style="color: #10b981; font-size: 0.8rem; font-family: var(--font-mono); margin-top: 0.5rem;">917.9 Million calcs/sec (Zero Alloc)</div>
+        </div>
       </div>
     </div>
   </section>
