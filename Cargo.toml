@@ -9,7 +9,7 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/bhubbard/active-ragdoll-rs"
 keywords = ["ragdoll", "active-ragdoll", "physics", "animation", "game-dev"]
-categories = ["game-development", "physics", "simulation"]
+categories = ["game-development", "simulation", "science"]
 
 [lib]
 name = "active_ragdoll_rs"
