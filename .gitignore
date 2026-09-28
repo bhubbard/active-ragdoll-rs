@@ -25,3 +25,5 @@ pkg/
 bin/*-bin
 *.tar.gz
 *.tsbuildinfo
+coverage_report
+target/coverage

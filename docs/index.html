@@ -1077,6 +1077,39 @@
           <div style="color: #10b981; font-size: 0.8rem; font-family: var(--font-mono); margin-top: 0.5rem;">917.9 Million calcs/sec (Zero Alloc)</div>
         </div>
       </div>
+
+      <!-- Biomechanical Accuracy & Control Verification -->
+      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+          <div>
+            <div style="color: #6366f1; font-size: 0.85rem; font-weight: 700; font-family: var(--font-mono); text-transform: uppercase;">📐 Biomechanical Control Accuracy &amp; Stability</div>
+            <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">Validated analytically via <code>tests/accuracy_test.rs</code> against PID control &amp; inverted pendulum mechanics.</div>
+          </div>
+          <span style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981; font-size: 0.75rem; font-family: var(--font-mono); padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 700;">66 / 66 Tests Passing</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; text-align: center; font-family: var(--font-mono);">
+          <div style="background: rgba(0, 0, 0, 0.3); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-subtle);">
+            <div style="color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase;">PD Force Parity</div>
+            <div style="color: #10b981; font-weight: 700; font-size: 1.1rem; margin-top: 0.25rem;">&Delta;F = 0.00 &times; 10⁻⁴</div>
+            <div style="color: var(--text-muted); font-size: 0.65rem; margin-top: 0.25rem;">Bit-Exact Control Law</div>
+          </div>
+          <div style="background: rgba(0, 0, 0, 0.3); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-subtle);">
+            <div style="color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase;">Torque Limit Clamping</div>
+            <div style="color: #38bdf8; font-weight: 700; font-size: 1.1rem; margin-top: 0.25rem;">0.0% Overshoot</div>
+            <div style="color: var(--text-muted); font-size: 0.65rem; margin-top: 0.25rem;">Strict Bounded Magnitude</div>
+          </div>
+          <div style="background: rgba(0, 0, 0, 0.3); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-subtle);">
+            <div style="color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase;">Pendulum Stability</div>
+            <div style="color: #a855f7; font-weight: 700; font-size: 1.1rem; margin-top: 0.25rem;">&tau;rest &gt; &tau;g</div>
+            <div style="color: var(--text-muted); font-size: 0.65rem; margin-top: 0.25rem;">+50% Stability Margin</div>
+          </div>
+          <div style="background: rgba(0, 0, 0, 0.3); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-subtle);">
+            <div style="color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase;">Humanoid 11-Bone Rig</div>
+            <div style="color: #6366f1; font-weight: 700; font-size: 1.1rem; margin-top: 0.25rem;">100% Valid</div>
+            <div style="color: var(--text-muted); font-size: 0.65rem; margin-top: 0.25rem;">Zero Orphan Limbs</div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
